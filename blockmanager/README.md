@@ -4,7 +4,7 @@ Package that generates and verifies blocks
   - Instantiate: <br>
     `	bm := Blockmanager{}`
   - Generating a block: <br>
-    `myBlock := bm.generateBlock(genesisBlock, <transaction string>)`
+    `myBlock := bm.generateBlock(oldBlock, <transaction string>)`
   - Verifying a block is the successor to the old block: <br>
     `	ok := bm.isBlockValid(newBlock, oldBlock)`
 
