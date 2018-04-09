@@ -64,3 +64,16 @@ func (bm *Blockmanager) generateBlock(oldBlock Block, transaction string) Block 
 
 	return newBlock
 }
+
+func (bm *Blockmanager) genesis() Block {
+	t := time.Now()
+	genesisBlock := Block{}
+	genesisBlock = Block{0, t.String(), 0, calculateHash(genesisBlock), ""}
+	//spew.Dump(genesisBlock)
+	return genesisBlock
+
+}
+
+func (bm *Blockmanager) proofOfWork() {
+
+}
