@@ -1,11 +1,16 @@
-package main
+package blockmanager
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
+	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
+
+const miningDifficulty = 1
 
 // Block represents each 'item' in the blockchain
 type Block struct {
@@ -14,8 +19,12 @@ type Block struct {
 	Hash      string
 	PrevHash  string
 
+	// attributes used for mining
+	Difficulty int
+	Nonce      string
+
 	// other transaction properties within a block
-	Transaction string
+	BlockTransaction Transaction
 }
 
 type Blockmanager struct {
@@ -23,25 +32,29 @@ type Blockmanager struct {
 
 type Action string
 
+func main() {
+	fmt.Println("hello?")
+}
 
 //Enum for all types of transactions
 const (
-	Create Action = "Create"
+	Create   Action = "Create"
 	Exchange Action = "Exchange"
-	Consume Action = "Consume"
-	Make Action = "Make"
-	Split Action = "Split"
+	Consume  Action = "Consume"
+	Make     Action = "Make"
+	Split    Action = "Split"
 )
 
 //Struct to represent all Transactions
-type Transaction struct{
-	Type Action
-	OriginUser int64
-	DestinationUser int64
+type Transaction struct {
+	Type             Action
+	OriginUser       int64
+	DestinationUser  int64
 	InitialTimestamp int
-	FinalTimestamp int
-	//Hash probably goes here as well @Sean
+	FinalTimestamp   int
 
+	//Hash probably goes here as well @Sean
+	Hash string
 }
 
 var bm Blockmanager
@@ -65,7 +78,14 @@ func (bm *Blockmanager) isBlockValid(newBlock, oldBlock Block) bool {
 
 // SHA256 hasing
 func (bm *Blockmanager) calculateHash(block Block) string {
-	record := strconv.Itoa(block.Index) + block.Timestamp + block.Transaction + block.PrevHash
+	// convert transaction struct into json string to be hashed
+	b, err := json.Marshal(block.BlockTransaction)
+	if err != nil {
+		fmt.Println(err)
+	}
+	transactionString := string(b)
+
+	record := strconv.Itoa(block.Index) + block.Timestamp + transactionString + block.PrevHash + block.Nonce
 	h := sha256.New()
 	h.Write([]byte(record))
 	hashed := h.Sum(nil)
@@ -73,7 +93,7 @@ func (bm *Blockmanager) calculateHash(block Block) string {
 }
 
 // create a new block using previous block's hash
-func (bm *Blockmanager) generateBlock(oldBlock Block, transaction string) Block {
+func (bm *Blockmanager) generateBlock(oldBlock Block, transaction Transaction) Block {
 
 	var newBlock Block
 
@@ -81,9 +101,26 @@ func (bm *Blockmanager) generateBlock(oldBlock Block, transaction string) Block 
 
 	newBlock.Index = oldBlock.Index + 1
 	newBlock.Timestamp = t.String()
-	newBlock.Transaction = transaction
+	newBlock.BlockTransaction = transaction
 	newBlock.PrevHash = oldBlock.Hash
-	newBlock.Hash = bm.calculateHash(newBlock)
+	newBlock.Difficulty = miningDifficulty
+
+	for i := 0; ; i++ {
+		hex := fmt.Sprintf("%x", i)
+		newBlock.Nonce = hex
+		hashAttempt := bm.calculateHash(newBlock)
+		if !bm.isHashValid(hashAttempt, newBlock.Difficulty) {
+			fmt.Println(hashAttempt, " not valid. Trying again...")
+			// simulate proof of work time consumed
+			time.Sleep(time.Second)
+			continue
+		} else {
+			fmt.Println(hashAttempt, " valid! Block mined")
+			newBlock.Hash = hashAttempt
+			break
+		}
+
+	}
 
 	return newBlock
 }
@@ -91,12 +128,22 @@ func (bm *Blockmanager) generateBlock(oldBlock Block, transaction string) Block 
 func (bm *Blockmanager) genesis() Block {
 	t := time.Now()
 	genesisBlock := Block{}
-	genesisBlock = Block{0, t.String(), 0, calculateHash(genesisBlock), ""}
+
+	genesisBlock = Block{
+		Index:            0,
+		Timestamp:        t.String(),
+		Hash:             bm.calculateHash(genesisBlock),
+		PrevHash:         "",
+		Difficulty:       miningDifficulty,
+		Nonce:            "",
+		BlockTransaction: Transaction{},
+	}
 	//spew.Dump(genesisBlock)
 	return genesisBlock
 
 }
 
-func (bm *Blockmanager) proofOfWork() {
-
+func (bm *Blockmanager) isHashValid(hash string, difficulty int) bool {
+	prefix := strings.Repeat("0", difficulty)
+	return strings.HasPrefix(hash, prefix)
 }
