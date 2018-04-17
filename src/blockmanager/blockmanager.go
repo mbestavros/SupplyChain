@@ -129,14 +129,17 @@ func (bm *Blockmanager) genesis() Block {
 	t := time.Now()
 	genesisBlock := Block{}
 
+	t1 := Transaction{
+		Type: "Create",
+	}
+	currTime := time.Now()
+	genesisBlock := Block{}
 	genesisBlock = Block{
 		Index:            0,
-		Timestamp:        t.String(),
+		Timestamp:        currTime.String(),
 		Hash:             bm.calculateHash(genesisBlock),
 		PrevHash:         "",
-		Difficulty:       miningDifficulty,
-		Nonce:            "",
-		BlockTransaction: Transaction{},
+		BlockTransaction: t1,
 	}
 	//spew.Dump(genesisBlock)
 	return genesisBlock

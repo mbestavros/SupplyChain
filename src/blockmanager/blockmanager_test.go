@@ -12,19 +12,8 @@ func TestGenerateMiningVerify(t *testing.T) {
 
 	fmt.Println("Generating a genesis block (CREATE transaction)...")
 
-	t1 := Transaction{
-		Type: "Create",
-	}
-
 	currTime := time.Now()
-	genesisBlock := Block{}
-	genesisBlock = Block{
-		Index:            0,
-		Timestamp:        currTime.String(),
-		Hash:             bm.calculateHash(genesisBlock),
-		PrevHash:         "",
-		BlockTransaction: t1,
-	}
+	genesisBlock := bm.genesis()
 	fmt.Printf("Genesis Block: %+v\n", genesisBlock)
 
 	// 1. GENERATE TEST
