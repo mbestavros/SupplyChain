@@ -1,4 +1,4 @@
-package main
+package blockmanager
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ func main() {
 
 	// "chain" and generate a new block
 	fmt.Printf("Generating a new EXCHANGE block on top of genesis block\n")
-	block1 := bm.generateBlock(genesisBlock, "EXCHANGE")
+	block1 := bm.GenerateBlock(genesisBlock, "EXCHANGE")
 	fmt.Printf("Block 1: %+v\n", block1)
 
 	// try to generate a new invalid block

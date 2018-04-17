@@ -1,4 +1,4 @@
-package main
+package blockmanager
 
 import (
 	"crypto/sha256"
@@ -73,7 +73,7 @@ func (bm *Blockmanager) calculateHash(block Block) string {
 }
 
 // create a new block using previous block's hash
-func (bm *Blockmanager) generateBlock(oldBlock Block, transaction string) Block {
+func (bm *Blockmanager) GenerateBlock(oldBlock Block, transaction string) Block {
 
 	var newBlock Block
 
@@ -88,10 +88,10 @@ func (bm *Blockmanager) generateBlock(oldBlock Block, transaction string) Block 
 	return newBlock
 }
 
-func (bm *Blockmanager) genesis() Block {
+func (bm *Blockmanager) Genesis() Block {
 	t := time.Now()
 	genesisBlock := Block{}
-	genesisBlock = Block{0, t.String(), 0, calculateHash(genesisBlock), ""}
+	genesisBlock = Block{0, t.String(), bm.calculateHash(genesisBlock), "","genesis"}
 	//spew.Dump(genesisBlock)
 	return genesisBlock
 
