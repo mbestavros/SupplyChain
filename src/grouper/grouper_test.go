@@ -10,6 +10,10 @@ import "testing"
 
 // this explains how to use grouper.go
 
+func TestOne(t *testing.T) {
+	t.Log("the first example test of grouper")
+}
+
 func TestMain(t *testing.T) {
 	t.Log("example test... doesn't do anything")
 	/*
