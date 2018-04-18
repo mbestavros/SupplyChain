@@ -94,7 +94,6 @@ func (bm *Blockmanager) calculateHash(block Block) string {
 
 // create a new block using previous block's hash
 func (bm *Blockmanager) generateBlock(oldBlock Block, transaction Transaction) Block {
-
 	var newBlock Block
 
 	t := time.Now()
@@ -125,7 +124,7 @@ func (bm *Blockmanager) generateBlock(oldBlock Block, transaction Transaction) B
 	return newBlock
 }
 
-func (bm *Blockmanager) genesis() Block {
+func (bm *Blockmanager) Genesis() Block {
 	t := time.Now()
 	genesisBlock := Block{}
 
