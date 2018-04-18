@@ -1,7 +1,5 @@
 package grouper
 
-// package main
-
 import (
 	"bytes"
 	"encoding/json"
@@ -12,7 +10,7 @@ import (
 	"sync"
 )
 
-type peer struct {
+type Peer struct {
 	Name string
 	Ip   string
 	Port string
@@ -20,8 +18,8 @@ type peer struct {
 
 type Grouper struct {
 	mu   sync.Mutex
-	Me   peer
-	Them []peer
+	Me   Peer
+	Them []Peer
 	srv  *http.Server
 }
 
@@ -62,7 +60,7 @@ func main() {
 func (gr *Grouper) StartNetwork(myIp, myPort, myName string) {
 	go gr.listenToSIGINT()
 	fmt.Println("starting network as", myIp+":"+myPort+":"+myName)
-	gr.Me = peer{Ip: myIp, Port: myPort, Name: myName}
+	gr.Me = Peer{Ip: myIp, Port: myPort, Name: myName}
 	gr.startHttpServer()
 }
 
@@ -70,20 +68,20 @@ func (gr *Grouper) StartNetwork(myIp, myPort, myName string) {
 func (gr *Grouper) JoinNetwork(friendIp, friendPort, myIp, myPort, myName string) {
 	go gr.listenToSIGINT()
 	fmt.Println("joining network as", myIp+":"+myPort+":"+myName)
-	gr.Me = peer{Ip: myIp, Port: myPort, Name: myName}
-	gr.getPeers(peer{Ip: friendIp, Port: friendPort})
+	gr.Me = Peer{Ip: myIp, Port: myPort, Name: myName}
+	gr.getPeers(Peer{Ip: friendIp, Port: friendPort})
 	gr.sendJoinRequests()
 	gr.startHttpServer()
 }
 
-func (gr *Grouper) getPeers(friend peer) {
+func (gr *Grouper) getPeers(friend Peer) {
 	cli := &http.Client{}
 	r, err := cli.Get("http://" + friend.Ip + ":" + friend.Port + "/getPeers")
 	if err != nil {
 		return
 	}
 	defer r.Body.Close()
-	var otherUsers []peer
+	var otherUsers []Peer
 	err = json.NewDecoder(r.Body).Decode(&otherUsers)
 	if err != nil {
 		fmt.Println("ERROR:", err)
@@ -94,7 +92,7 @@ func (gr *Grouper) getPeers(friend peer) {
 
 func (gr *Grouper) sendJoinRequests() {
 	for _, usr := range gr.Them {
-		go func(p peer) {
+		go func(p Peer) {
 			b := new(bytes.Buffer)
 			json.NewEncoder(b).Encode(gr.Me)
 			http.Post("http://"+p.Ip+":"+p.Port+"/joinNet", "application/json; charset=utf-8", b)
@@ -106,7 +104,7 @@ func (gr *Grouper) sendLeaveRequests() {
 	var wg sync.WaitGroup
 	for _, usr := range gr.Them {
 		wg.Add(1)
-		go func(p peer) {
+		go func(p Peer) {
 			b := new(bytes.Buffer)
 			json.NewEncoder(b).Encode(gr.Me)
 			http.Post("http://"+p.Ip+":"+p.Port+"/leaveNet", "application/json; charset=utf-8", b)
@@ -133,11 +131,12 @@ func (gr *Grouper) Shutdown() {
 
 func (gr *Grouper) startHttpServer() {
 	gr.srv = &http.Server{Addr: ":" + gr.Me.Port}
-	http.HandleFunc("/getPeers", gr.handleGetPeers)
-	http.HandleFunc("/joinNet", gr.handleJoinNet)
-	http.HandleFunc("/leaveNet", gr.handleLeaveNet)
+	serverMuxGrouper := http.NewServeMux()
+	serverMuxGrouper.HandleFunc("/getPeers", gr.handleGetPeers)
+	serverMuxGrouper.HandleFunc("/joinNet", gr.handleJoinNet)
+	serverMuxGrouper.HandleFunc("/leaveNet", gr.handleLeaveNet)
 	go func() {
-		http.ListenAndServe(":"+gr.Me.Port, nil)
+		http.ListenAndServe(":"+gr.Me.Port, serverMuxGrouper)
 	}()
 }
 
@@ -147,14 +146,14 @@ func (gr *Grouper) handleGetPeers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (gr *Grouper) handleJoinNet(w http.ResponseWriter, r *http.Request) {
-	user := peer{}
+	user := Peer{}
 	json.NewDecoder(r.Body).Decode(&user)
 	gr.Them = append(gr.Them, user)
 	fmt.Println(user.Name, "has joined")
 }
 
 func (gr *Grouper) handleLeaveNet(w http.ResponseWriter, r *http.Request) {
-	user := peer{}
+	user := Peer{}
 	json.NewDecoder(r.Body).Decode(&user)
 	fmt.Println(user.Name, "has left")
 	// find who it is, and remove them

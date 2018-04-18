@@ -24,7 +24,7 @@ func TestGenerateMiningVerify(t *testing.T) {
 		Type: "Create",
 	}
 	fmt.Printf("Generating a new EXCHANGE block on top of genesis block\n")
-	block1 := bm.generateBlock(genesisBlock, t2)
+	block1 := bm.GenerateBlock(genesisBlock, t2)
 	fmt.Printf("Block 1: %+v\n", block1)
 
 	// try to generate a new invalid block

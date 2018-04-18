@@ -60,7 +60,7 @@ type Transaction struct {
 var bm Blockmanager
 
 // make sure block is valid by checking index, and comparing the hash of the previous block
-func (bm *Blockmanager) isBlockValid(newBlock, oldBlock Block) bool {
+func (bm *Blockmanager) IsBlockValid(newBlock, oldBlock Block) bool {
 	if oldBlock.Index+1 != newBlock.Index {
 		return false
 	}
@@ -93,7 +93,7 @@ func (bm *Blockmanager) calculateHash(block Block) string {
 }
 
 // create a new block using previous block's hash
-func (bm *Blockmanager) generateBlock(oldBlock Block, transaction Transaction) Block {
+func (bm *Blockmanager) GenerateBlock(oldBlock Block, transaction Transaction) Block {
 	var newBlock Block
 
 	t := time.Now()
@@ -125,9 +125,6 @@ func (bm *Blockmanager) generateBlock(oldBlock Block, transaction Transaction) B
 }
 
 func (bm *Blockmanager) Genesis() Block {
-	t := time.Now()
-	genesisBlock := Block{}
-
 	t1 := Transaction{
 		Type: "Create",
 	}
