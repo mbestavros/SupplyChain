@@ -60,7 +60,7 @@ type Transaction struct {
 var bm Blockmanager
 
 // make sure block is valid by checking index, and comparing the hash of the previous block
-func (bm *Blockmanager) IsBlockValid(newBlock, oldBlock Block) bool {
+func (bm *Blockmanager) IsBlockValid(newBlock Block, oldBlock Block) bool {
 	if oldBlock.Index+1 != newBlock.Index {
 		return false
 	}

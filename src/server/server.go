@@ -100,15 +100,12 @@ func (sr *Server) Join(friendIp string, friendPort string, myPort string, myName
 func (sr *Server) SendBlock(block blockmanager.Block, transaction blockmanager.Transaction) {
 	newBlock := sr.bm.GenerateBlock(block, transaction)
 	sr.bcServer = append(sr.bcServer, newBlock)
-	fmt.Println(newBlock)
 
 	var wg sync.WaitGroup
-	// fmt.Println("them", sr.gr.Them)
 	for _, usr := range sr.gr.Them {
 		wg.Add(1)
 		go func(p grouper.Peer) {
 			b := new(bytes.Buffer)
-			fmt.Println("in send block")
 			json.NewEncoder(b).Encode(newBlock)
 			port := increment_port(p.Port)
 			http.Post("http://"+p.Ip+":"+port+"/verifyBlock", "application/json; charset=utf-8", b)
@@ -120,21 +117,22 @@ func (sr *Server) SendBlock(block blockmanager.Block, transaction blockmanager.T
 
 // Helper for get request to get existing blockchain
 func (sr *Server) helperJoinGetBlock(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(sr.bcServer)
 	json.NewEncoder(w).Encode(sr.bcServer)
-	fmt.Println("encoded")
 }
 
 // Helper for receiving a block, checking if it's valid
 func (sr *Server) helperVerifyBlock(w http.ResponseWriter, r *http.Request) {
 	newBlock := blockmanager.Block{}
 	json.NewDecoder(r.Body).Decode(&newBlock)
-	isValid := sr.bm.IsBlockValid(sr.bcServer[len(sr.bcServer)-1], newBlock)
+	isValid := sr.bm.IsBlockValid(newBlock, sr.bcServer[len(sr.bcServer)-1])
+	
 	if isValid {
-		sr.bcServer = append(sr.bcServer, newBlock)
-		fmt.Println("appending in verify")
+		if sr.bcServer[len(sr.bcServer)-1] != newBlock {
+			sr.bcServer = append(sr.bcServer, newBlock)
+		}
 	}
-	fmt.Println("helper verify successful")
+	fmt.Println("server: ", sr.gr.Me)
+	fmt.Println("bcserver", sr.bcServer)
 }
 
 func increment_port(old_port string) string {

@@ -44,10 +44,10 @@ func TestGenerateMiningVerify(t *testing.T) {
 
 	// 2. VALIDATION TEST
 	fmt.Printf("--------------\n")
-	ok := bm.isBlockValid(block1, genesisBlock)
+	ok := bm.IsBlockValid(block1, genesisBlock)
 	fmt.Printf("Is block 1 the correct successor to genesis block? (should be true): %t\n", ok)
 
-	ok = bm.isBlockValid(faultyBlock, genesisBlock)
+	ok = bm.IsBlockValid(faultyBlock, genesisBlock)
 	fmt.Printf("Is (faulty) block 1 the correct successor to genesis block? (should be false): %t\n", ok)
 
 }
