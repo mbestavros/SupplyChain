@@ -1,9 +1,9 @@
 package server
 
-import 
-(
+import (
 	"blockmanager"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,16 +12,17 @@ import
 	"net/http"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type Server struct {
-	gr grouper.Grouper
-	bm blockmanager.Blockmanager
+	gr       grouper.Grouper
+	bm       blockmanager.Blockmanager
 	bcServer []blockmanager.Block
-	srv  *http.Server
+	srv      *http.Server
 }
 
-var sr Server 
+var sr Server
 
 func (sr *Server) externalIP() (string, error) {
 	ifaces, err := net.Interfaces()
@@ -61,8 +62,8 @@ func (sr *Server) externalIP() (string, error) {
 }
 
 //Start network in case of genesis block
-func (sr *Server) Genesis(myPort string, myName string){
-	
+func (sr *Server) Genesis(myPort string, myName string) {
+
 	genesisBlock := sr.bm.Genesis()
 	myIp, err := sr.externalIP()
 	if err != nil {
@@ -72,15 +73,14 @@ func (sr *Server) Genesis(myPort string, myName string){
 	sr.bcServer = append(sr.bcServer, genesisBlock)
 }
 
-// Join network if not genesis 
-func (sr *Server) Join(friendIp string, friendPort string, myPort string, myName string){
-	
+// Join network if not genesis
+func (sr *Server) Join(friendIp string, friendPort string, myPort string, myName string) {
+
 	myIp, err := sr.externalIP()
 	if err != nil {
 		fmt.Println("Error getting IP address: ", err)
 	}
 	sr.gr.JoinNetwork(friendIp, friendPort, myIp, myPort, myName)
-	fmt.Println("them", sr.gr.Them)
 
 	cli := &http.Client{}
 	friendPort = increment_port(friendPort)
@@ -103,9 +103,8 @@ func (sr *Server) SendBlock(block blockmanager.Block, transaction blockmanager.T
 	fmt.Println(newBlock)
 
 	var wg sync.WaitGroup
-	fmt.Println("them",sr.gr.Them)
+	// fmt.Println("them", sr.gr.Them)
 	for _, usr := range sr.gr.Them {
-		fmt.Println("usr",usr)
 		wg.Add(1)
 		go func(p grouper.Peer) {
 			b := new(bytes.Buffer)
@@ -120,14 +119,14 @@ func (sr *Server) SendBlock(block blockmanager.Block, transaction blockmanager.T
 }
 
 // Helper for get request to get existing blockchain
-func (sr *Server) helperJoinGetBlock(w http.ResponseWriter, r *http.Request){
+func (sr *Server) helperJoinGetBlock(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(sr.bcServer)
 	json.NewEncoder(w).Encode(sr.bcServer)
 	fmt.Println("encoded")
 }
 
 // Helper for receiving a block, checking if it's valid
-func (sr *Server) helperVerifyBlock(w http.ResponseWriter, r *http.Request){
+func (sr *Server) helperVerifyBlock(w http.ResponseWriter, r *http.Request) {
 	newBlock := blockmanager.Block{}
 	json.NewDecoder(r.Body).Decode(&newBlock)
 	isValid := sr.bm.IsBlockValid(sr.bcServer[len(sr.bcServer)-1], newBlock)
@@ -151,14 +150,19 @@ func increment_port(old_port string) string {
 }
 
 // Listening on http server
-func (sr *Server) start(){
+func (sr *Server) start() {
 	port := increment_port(sr.gr.Me.Port)
-
 	serverMuxServer := http.NewServeMux()
+	sr.srv = &http.Server{Handler: serverMuxServer}
 	serverMuxServer.HandleFunc("/joinGetBlock", sr.helperJoinGetBlock)
 	serverMuxServer.HandleFunc("/verifyBlock", sr.helperVerifyBlock)
 	go func() {
-		fmt.Println("inside go routine for server: ", sr.gr.Me)
 		http.ListenAndServe(":"+port, serverMuxServer)
 	}()
+}
+
+func (sr *Server) shutdown() {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	sr.gr.Shutdown()
+	sr.srv.Shutdown(ctx)
 }

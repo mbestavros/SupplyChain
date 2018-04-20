@@ -2,12 +2,14 @@ package grouper
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"sync"
+	"time"
 )
 
 type Peer struct {
@@ -20,7 +22,7 @@ type Grouper struct {
 	mu   sync.Mutex
 	Me   Peer
 	Them []Peer
-	srv  *http.Server
+	Srv  *http.Server
 }
 
 var gr Grouper
@@ -92,11 +94,12 @@ func (gr *Grouper) getPeers(friend Peer) {
 
 func (gr *Grouper) sendJoinRequests() {
 	for _, usr := range gr.Them {
-		go func(p Peer) {
-			b := new(bytes.Buffer)
-			json.NewEncoder(b).Encode(gr.Me)
-			http.Post("http://"+p.Ip+":"+p.Port+"/joinNet", "application/json; charset=utf-8", b)
-		}(usr)
+		// go func(p Peer) {
+		fmt.Println("Asking", usr.Name, "to join")
+		b := new(bytes.Buffer)
+		json.NewEncoder(b).Encode(gr.Me)
+		http.Post("http://"+usr.Ip+":"+usr.Port+"/joinNet", "application/json; charset=utf-8", b)
+		// }(usr)
 	}
 }
 
@@ -125,13 +128,14 @@ func (gr *Grouper) listenToSIGINT() {
 }
 
 func (gr *Grouper) Shutdown() {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	gr.sendLeaveRequests()
-	gr.srv.Shutdown(nil)
+	gr.Srv.Shutdown(ctx)
 }
 
 func (gr *Grouper) startHttpServer() {
-	gr.srv = &http.Server{Addr: ":" + gr.Me.Port}
 	serverMuxGrouper := http.NewServeMux()
+	gr.Srv = &http.Server{Handler: serverMuxGrouper}
 	serverMuxGrouper.HandleFunc("/getPeers", gr.handleGetPeers)
 	serverMuxGrouper.HandleFunc("/joinNet", gr.handleJoinNet)
 	serverMuxGrouper.HandleFunc("/leaveNet", gr.handleLeaveNet)
