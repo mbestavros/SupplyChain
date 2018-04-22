@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"os/signal"
@@ -61,7 +62,8 @@ func main() {
 // func - start your own network
 func (gr *Grouper) StartNetwork(myIp, myPort, myName string) {
 	go gr.listenToSIGINT()
-	fmt.Println("starting network as", myIp+":"+myPort+":"+myName)
+	log.Debug("starting network as ", myIp+":"+myPort+":"+myName)
+	// fmt.Println("starting network as", myIp+":"+myPort+":"+myName)
 	gr.Me = Peer{Ip: myIp, Port: myPort, Name: myName}
 	gr.startHttpServer()
 }
@@ -69,7 +71,7 @@ func (gr *Grouper) StartNetwork(myIp, myPort, myName string) {
 // func - join a network
 func (gr *Grouper) JoinNetwork(friendIp, friendPort, myIp, myPort, myName string) {
 	go gr.listenToSIGINT()
-	fmt.Println("joining network as", myIp+":"+myPort+":"+myName)
+	log.Debug("joining network as ", myIp+":"+myPort+":"+myName)
 	gr.Me = Peer{Ip: myIp, Port: myPort, Name: myName}
 	gr.getPeers(Peer{Ip: friendIp, Port: friendPort})
 	gr.sendJoinRequests()
@@ -86,7 +88,7 @@ func (gr *Grouper) getPeers(friend Peer) {
 	var otherUsers []Peer
 	err = json.NewDecoder(r.Body).Decode(&otherUsers)
 	if err != nil {
-		fmt.Println("ERROR:", err)
+		log.Debug("ERROR:", err)
 		return
 	}
 	gr.Them = otherUsers
@@ -95,7 +97,7 @@ func (gr *Grouper) getPeers(friend Peer) {
 func (gr *Grouper) sendJoinRequests() {
 	for _, usr := range gr.Them {
 		// go func(p Peer) {
-		fmt.Println("Asking", usr.Name, "to join")
+		log.Debug("Asking", usr.Name, "to join")
 		b := new(bytes.Buffer)
 		json.NewEncoder(b).Encode(gr.Me)
 		http.Post("http://"+usr.Ip+":"+usr.Port+"/joinNet", "application/json; charset=utf-8", b)
@@ -153,13 +155,15 @@ func (gr *Grouper) handleJoinNet(w http.ResponseWriter, r *http.Request) {
 	user := Peer{}
 	json.NewDecoder(r.Body).Decode(&user)
 	gr.Them = append(gr.Them, user)
-	fmt.Println(user.Name, "has joined")
+	log.Debug(user.Name, "has joined")
+	fmt.Println("<<", user.Name, "has joined the network >>")
 }
 
 func (gr *Grouper) handleLeaveNet(w http.ResponseWriter, r *http.Request) {
 	user := Peer{}
 	json.NewDecoder(r.Body).Decode(&user)
-	fmt.Println(user.Name, "has left")
+	log.Debug(user.Name, "has left")
+	fmt.Println("<<", user.Name, "has left the network >>")
 	// find who it is, and remove them
 	for ind, usr := range gr.Them {
 		if user == usr {

@@ -35,3 +35,7 @@ To run the program, type "go build cli" and then run "./cli" to launch the comma
 
 ![](imgs/testing.png)
 
+## Debugging
+
+We're using the logrus library. The first time you run your code you will need to first run `go get github.com/sirupsen/logrus`. To use it, include `log "github.com/sirupsen/logrus"` in your imports. To set the log level to Debug, for example, write `log.SetLevel(log.DebugLevel)`. To then log something to Debug, use `log.Debug("Debug statement!")`.
+

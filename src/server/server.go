@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"grouper"
 	"net"
 	"net/http"
@@ -67,7 +68,7 @@ func (sr *Server) Genesis(myPort string, myName string) {
 	genesisBlock := sr.bm.Genesis()
 	myIp, err := sr.externalIP()
 	if err != nil {
-		fmt.Println("Error getting IP address: ", err)
+		log.Debug("Error getting IP address: ", err)
 	}
 	sr.gr.StartNetwork(myIp, myPort, myName)
 	sr.bcServer = append(sr.bcServer, genesisBlock)
@@ -78,7 +79,7 @@ func (sr *Server) Join(friendIp string, friendPort string, myPort string, myName
 
 	myIp, err := sr.externalIP()
 	if err != nil {
-		fmt.Println("Error getting IP address: ", err)
+		log.Debug("Error getting IP address: ", err)
 	}
 	sr.gr.JoinNetwork(friendIp, friendPort, myIp, myPort, myName)
 
@@ -90,7 +91,7 @@ func (sr *Server) Join(friendIp string, friendPort string, myPort string, myName
 
 	err = json.NewDecoder(r.Body).Decode(&bcServer)
 	if err != nil {
-		fmt.Println("ERROR in join in server.go:", err)
+		log.Debug("ERROR in join in server.go:", err)
 		return
 	}
 	sr.bcServer = bcServer
@@ -125,20 +126,23 @@ func (sr *Server) helperVerifyBlock(w http.ResponseWriter, r *http.Request) {
 	newBlock := blockmanager.Block{}
 	json.NewDecoder(r.Body).Decode(&newBlock)
 	isValid := sr.bm.IsBlockValid(newBlock, sr.bcServer[len(sr.bcServer)-1])
-	
+
 	if isValid {
 		if sr.bcServer[len(sr.bcServer)-1] != newBlock {
 			sr.bcServer = append(sr.bcServer, newBlock)
+			fmt.Println("<< recieved new valid block >>")
 		}
+	} else {
+		fmt.Println("<< recieved invalid block >>")
 	}
-	fmt.Println("server: ", sr.gr.Me)
-	fmt.Println("bcserver", sr.bcServer)
+	log.Debug("server: ", sr.gr.Me)
+	log.Debug("bcserver", sr.bcServer)
 }
 
 func increment_port(old_port string) string {
 	port_int, err := strconv.Atoi(old_port)
 	if err != nil {
-		fmt.Println("Error: ", err)
+		log.Debug("Error: ", err)
 		return "ERROR"
 	}
 

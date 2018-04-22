@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
 	"time"
@@ -107,14 +108,15 @@ func (bm *Blockmanager) GenerateBlock(oldBlock Block, transaction Transaction) B
 	for i := 0; ; i++ {
 		hex := fmt.Sprintf("%x", i)
 		newBlock.Nonce = hex
+		fmt.Println("<< mining... >>")
 		hashAttempt := bm.calculateHash(newBlock)
 		if !bm.isHashValid(hashAttempt, newBlock.Difficulty) {
-			fmt.Println(hashAttempt, " not valid. Trying again...")
+			log.Debug(hashAttempt, " not valid. Trying again...")
 			// simulate proof of work time consumed
 			time.Sleep(time.Second)
 			continue
 		} else {
-			fmt.Println(hashAttempt, " valid! Block mined")
+			log.Debug(hashAttempt, " valid! Block mined")
 			newBlock.Hash = hashAttempt
 			break
 		}

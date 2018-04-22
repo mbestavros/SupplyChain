@@ -3,6 +3,7 @@ package server
 import (
 	"blockmanager"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"testing"
 	"time"
 )
@@ -14,6 +15,7 @@ func TestIP(t *testing.T) {
 }
 
 func TestJoin(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
 	t.Log("Testing genesis block")
 	fmt.Println("Testing genesis block")
 
@@ -41,7 +43,6 @@ func TestJoin(t *testing.T) {
 	transaction.DestinationUser = 2
 	transaction.InitialTimestamp = 0
 	transaction.FinalTimestamp = 0
-
 
 	sr.SendBlock(sr.bcServer[0], transaction)
 
