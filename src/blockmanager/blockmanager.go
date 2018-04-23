@@ -53,9 +53,6 @@ type Transaction struct {
 	DestinationUser  int64
 	InitialTimestamp int
 	FinalTimestamp   int
-
-	//Hash probably goes here as well @Sean
-	Hash string
 }
 
 var bm Blockmanager
@@ -75,6 +72,107 @@ func (bm *Blockmanager) IsBlockValid(newBlock Block, oldBlock Block) bool {
 	}
 
 	return true
+}
+
+//Creates new Create Transaction Block
+func (bm *Blockmanager) CreateTransaction(mostRecentBlock Block, originUser int64) Block {
+	currTime := time.Now()
+	newTrans := Transaction{
+		Type: "Create",
+		OriginUser: originUser,
+		DestinationUser:  originUser,
+		InitialTimestamp: currTime,
+	}
+	createBlock := Block{}
+	createBlock = Block{
+		Index:            mostRecentBlock.Index + 1,
+		Timestamp:        currTime.String(),
+		Hash:             bm.calculateHash(createBlock),
+		PrevHash:         mostRecentBlock.Hash,
+		BlockTransaction: newTrans,
+	}
+	return createBlock
+}
+
+//Creates new Exchange Transaction Block
+func (bm *Blockmanager) ExchangeTransaction(mostRecentBlock Block, originUser int64, destinationUser int64) Block {
+	currTime := time.Now()
+	newTrans := Transaction{
+		Type: "Exchange",
+		OriginUser: originUser,
+		DestinationUser:  destinationUser,
+		InitialTimestamp: currTime,
+	}
+	exchangeBlock := Block{}
+	exchangeBlock = Block{
+		Index:            mostRecentBlock.Index + 1,
+		Timestamp:        currTime.String(),
+		Hash:             bm.calculateHash(createBlock),
+		PrevHash:         mostRecentBlock.Hash,
+		BlockTransaction: newTrans,
+	}
+	return exchangeBlock
+}
+
+//Creates new Consume Transaction Block
+func (bm *Blockmanager) ConsumeTransaction(mostRecentBlock Block, blockToBeConsumed Block, destinationUser int64) Block {
+	currTime := time.Now()
+	newTrans := Transaction{
+		Type: "Consume",
+		OriginUser: blockToBeConsumed.BlockTransaction.OriginUser,
+		DestinationUser:  destinationUser,
+		InitialTimestamp: blockToBeConsumed.BlockTransaction.InitialTimestamp,
+		FinalTimestamp: currTime,
+	}
+	consumeBlock := Block{}
+	consumeBlock = Block{
+		Index:            mostRecentBlock.Index + 1,
+		Timestamp:        currTime.String(),
+		Hash:             bm.calculateHash(createBlock),
+		PrevHash:         mostRecentBlock.Hash,
+		BlockTransaction: newTrans,
+	}
+	return consumeBlock
+}
+
+//Creates new Make Transaction Block
+func (bm *Blockmanager) MakeTransaction(mostRecentBlock Block, originUser int64) Block {
+	currTime := time.Now()
+	newTrans := Transaction{
+		Type: "Make",
+		OriginUser: originUser,
+		DestinationUser:  originUser,
+		InitialTimestamp: currTime,
+	}
+	makeBlock := Block{}
+	makeBlock = Block{
+		Index:            mostRecentBlock.Index + 1,
+		Timestamp:        currTime.String(),
+		Hash:             bm.calculateHash(createBlock),
+		PrevHash:         mostRecentBlock.Hash,
+		BlockTransaction: newTrans,
+	}
+	return makeBlock
+}
+
+//Creates new Split Transaction Block
+func (bm *Blockmanager) SplitTransaction(mostRecentBlock Block, originUser int64) Block {
+	currTime := time.Now()
+	newTrans := Transaction{
+		Type: "Split",
+		OriginUser: originUser,
+		DestinationUser:  originUser,
+		InitialTimestamp: currTime,
+	}
+	splitBlock := Block{}
+	splitBlock = Block{
+		Index:            mostRecentBlock.Index + 1,
+		Timestamp:        currTime.String(),
+		Hash:             bm.calculateHash(createBlock),
+		PrevHash:         mostRecentBlock.Hash,
+		BlockTransaction: newTrans,
+	}
+	return makeBlock
 }
 
 // SHA256 hasing
