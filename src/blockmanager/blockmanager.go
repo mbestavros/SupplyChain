@@ -117,6 +117,7 @@ func (bm *Blockmanager) GenerateBlock(oldBlock Block, transaction Transaction) B
 			continue
 		} else {
 			log.Debug(hashAttempt, " valid! Block mined")
+			fmt.Println("<< mined! >>")
 			newBlock.Hash = hashAttempt
 			break
 		}
@@ -145,6 +146,12 @@ func (bm *Blockmanager) Genesis() Block {
 }
 
 func (bm *Blockmanager) isHashValid(hash string, difficulty int) bool {
+	// temporarily making hash easier (avg 5 tries)
 	prefix := strings.Repeat("0", difficulty)
-	return strings.HasPrefix(hash, prefix)
+	prefix2 := strings.Repeat("1", difficulty)
+	prefix3 := strings.Repeat("2", difficulty)
+	return strings.HasPrefix(hash, prefix) ||
+		strings.HasPrefix(hash, prefix2) ||
+		strings.HasPrefix(hash, prefix3)
+
 }

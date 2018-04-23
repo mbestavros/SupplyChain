@@ -21,7 +21,7 @@ func TestJoin(t *testing.T) {
 
 	sr := Server{}
 	sr.Genesis("8080", "shreya")
-	sr.start()
+	sr.Start()
 
 	// sleep so that sr has time to start up
 	time.Sleep(1000 * time.Millisecond)
@@ -29,7 +29,7 @@ func TestJoin(t *testing.T) {
 
 	sr2 := Server{}
 	sr2.Join("localhost", "8080", "8082", "shreya2")
-	sr2.start()
+	sr2.Start()
 
 	// sleep so that sr2 and sr are all caught up before printing
 	time.Sleep(1000 * time.Millisecond)
@@ -52,6 +52,6 @@ func TestJoin(t *testing.T) {
 	} else {
 		return
 	}
-	sr.shutdown()
-	sr2.shutdown()
+	sr.Shutdown()
+	sr2.Shutdown()
 }

@@ -130,9 +130,12 @@ func (gr *Grouper) listenToSIGINT() {
 }
 
 func (gr *Grouper) Shutdown() {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	gr.sendLeaveRequests()
-	gr.Srv.Shutdown(ctx)
+	if gr.Srv != nil {
+		fmt.Println("<< shutting down grouper... >>")
+		ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		gr.sendLeaveRequests()
+		gr.Srv.Shutdown(ctx)
+	}
 }
 
 func (gr *Grouper) startHttpServer() {

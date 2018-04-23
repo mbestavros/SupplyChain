@@ -101,6 +101,7 @@ func (sr *Server) Join(friendIp string, friendPort string, myPort string, myName
 func (sr *Server) SendBlock(block blockmanager.Block, transaction blockmanager.Transaction) {
 	newBlock := sr.bm.GenerateBlock(block, transaction)
 	sr.bcServer = append(sr.bcServer, newBlock)
+	fmt.Println("<< sending new block to others... >> ")
 
 	var wg sync.WaitGroup
 	for _, usr := range sr.gr.Them {
@@ -114,6 +115,11 @@ func (sr *Server) SendBlock(block blockmanager.Block, transaction blockmanager.T
 		}(usr)
 		wg.Wait()
 	}
+	fmt.Println("<< block has been broadcasted! >> ")
+}
+
+func (sr *Server) NewTransaction(tran blockmanager.Transaction) {
+	sr.SendBlock(sr.bcServer[len(sr.bcServer)-1], tran)
 }
 
 // Helper for get request to get existing blockchain
@@ -152,7 +158,7 @@ func increment_port(old_port string) string {
 }
 
 // Listening on http server
-func (sr *Server) start() {
+func (sr *Server) Start() {
 	port := increment_port(sr.gr.Me.Port)
 	serverMuxServer := http.NewServeMux()
 	sr.srv = &http.Server{Handler: serverMuxServer}
@@ -163,8 +169,11 @@ func (sr *Server) start() {
 	}()
 }
 
-func (sr *Server) shutdown() {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	sr.gr.Shutdown()
-	sr.srv.Shutdown(ctx)
+func (sr *Server) Shutdown() {
+	if sr.srv != nil {
+		fmt.Println("<< shutting down server... >>")
+		ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		sr.gr.Shutdown()
+		sr.srv.Shutdown(ctx)
+	}
 }

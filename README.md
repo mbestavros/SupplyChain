@@ -39,3 +39,6 @@ To run the program, type "go build cli" and then run "./cli" to launch the comma
 
 We're using the logrus library. The first time you run your code you will need to first run `go get github.com/sirupsen/logrus`. To use it, include `log "github.com/sirupsen/logrus"` in your imports. To set the log level to Debug, for example, write `log.SetLevel(log.DebugLevel)`. To then log something to Debug, use `log.Debug("Debug statement!")`.
 
+## TODO
+* We need a "lookup" function in blockmanager, which lets you look up the history of an item, including all of its related transactions.
+* Verification should be improved for security such that if a user tries to transact on an item which isn't theirs, verification fails. This can use the above lookup function.
