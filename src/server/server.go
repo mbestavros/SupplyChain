@@ -134,10 +134,8 @@ func (sr *Server) helperVerifyBlock(w http.ResponseWriter, r *http.Request) {
 	isValid := sr.bm.IsBlockValid(newBlock, sr.bcServer[len(sr.bcServer)-1])
 
 	if isValid {
-		if sr.bcServer[len(sr.bcServer)-1] != newBlock {
-			sr.bcServer = append(sr.bcServer, newBlock)
-			fmt.Println("<< recieved new valid block >>")
-		}
+		sr.bcServer = append(sr.bcServer, newBlock)
+		fmt.Println("<< recieved new valid block >>")
 	} else {
 		fmt.Println("<< recieved invalid block >>")
 	}
