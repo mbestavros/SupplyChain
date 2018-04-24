@@ -3,7 +3,7 @@ This is the public-facing server that we will use to visualize our blockchain in
 ## Setup
 
 - Ensure `Python3` is installed (tested on 3.6)
-- Ensure `Flask is` installed (`pip install Flask`)
+- Ensure `Flask` is installed (`pip install Flask`)
 
 ## Running the server
 
