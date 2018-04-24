@@ -17,8 +17,8 @@ def display_json():
 
 if __name__ == '__main__':
 	# Default value for run() starts the server on localhost, good for debugging
-	# app.run()
+	app.run()
 
 	# Running on 0.0.0.0 makes it visible using my machine's IP address over local network (i.e. BU network)
 	# Test this with another machine close by
-    app.run(host='0.0.0.0')
+    # app.run(host='0.0.0.0')
