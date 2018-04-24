@@ -51,3 +51,8 @@ func TestGenerateMiningVerify(t *testing.T) {
 	fmt.Printf("Is (faulty) block 1 the correct successor to genesis block? (should be false): %t\n", ok)
 
 }
+
+func TestUID(t *testing.T){
+	id := generateUID()
+	fmt.Println("uid", id)
+}

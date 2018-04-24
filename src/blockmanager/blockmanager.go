@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/rs/xid"
 	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
@@ -59,6 +60,10 @@ type Transaction struct {
 }
 
 var bm Blockmanager
+
+func generateUID() string {
+	return xid.New().String()
+}
 
 // make sure block is valid by checking index, and comparing the hash of the previous block
 func (bm *Blockmanager) IsBlockValid(newBlock Block, oldBlock Block) bool {

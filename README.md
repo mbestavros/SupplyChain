@@ -5,6 +5,10 @@ Setup:
 
 * Set your GOPATH variable to be the root folder of this repo, and go to that folder. You can do this by navigating to the main directory and running "GOPATH=\$(pwd)"
 
+Run the following to get required packages:
+`go get github.com/rs/xid`
+`go get github.com/sirupsen/logrus`
+
 Structure:
 
 * all code should be in the "src" folder, within a subfolder. That subfolder is the package for that code. The cli package has a main function and is the "main" package because that's what'll run on program startup.
