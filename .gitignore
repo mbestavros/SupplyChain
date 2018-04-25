@@ -1,2 +1,7 @@
 .DS_Store
 .env
+pkg/
+cli
+
+src/github.com/
+src/golang.org/
