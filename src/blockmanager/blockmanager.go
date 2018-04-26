@@ -26,7 +26,7 @@ type Block struct {
 	Nonce      string
 
 	// other transaction properties within a block
-	BlockTransaction Transaction
+	BlockTransaction TransactionProvider
 }
 
 type Blockmanager struct {
@@ -76,7 +76,7 @@ func (bm *Blockmanager) calculateHash(block Block) string {
 }
 
 // create a new block using previous block's hash
-func (bm *Blockmanager) GenerateBlock(oldBlock Block, transaction Transaction) Block {
+func (bm *Blockmanager) GenerateBlock(oldBlock Block, transaction TransactionProvider) Block {
 	var newBlock Block
 
 	t := time.Now()
@@ -110,7 +110,7 @@ func (bm *Blockmanager) GenerateBlock(oldBlock Block, transaction Transaction) B
 }
 
 func (bm *Blockmanager) Genesis() Block {
-	t1 := CreateTransaction{}
+	t1 := &CreateTransaction{}
 	currTime := time.Now()
 	genesisBlock := Block{}
 	genesisBlock = Block{
@@ -137,15 +137,17 @@ func (bm *Blockmanager) isHashValid(hash string, difficulty int) bool {
 }
 
 //Returns a new Create Transaction struct
-func (bm *Blockmanager) BuildCreateTransaction(itemName string, userId string) Transaction {
+func (bm *Blockmanager) BuildCreateTransaction(itemName string, userId string) TransactionProvider {
 	currTime := int64(time.Now().Unix())
 
 	// origin user is empty string because an item is being created
-	createTrans := CreateTransaction{
-		TransactionType:   Create,
+	createTrans := &CreateTransaction{
+		Transaction: Transaction{
+			TransactionType: Create,
+			TimeTransacted:  currTime,
+		},
 		OriginUserId:      "",
 		DestinationUserId: userId,
-		TimeTransacted:    currTime,
 		ItemName:          itemName,
 		ItemId:            generateUID(),
 	}
@@ -154,59 +156,65 @@ func (bm *Blockmanager) BuildCreateTransaction(itemName string, userId string) T
 }
 
 //Returns a new Exchange Transaction struct
-func (bm *Blockmanager) BuildExchangeTransaction(itemName string, originUserId string, destinationUserId string) Transaction {
+func (bm *Blockmanager) BuildExchangeTransaction(itemName string, originUserId string, destinationUserId string) TransactionProvider {
 	currTime := int64(time.Now().Unix())
-	exchTrans := ExchangeTransaction{
-		TransactionType:   Exchange,
+	exchTrans := &ExchangeTransaction{
+		Transaction: Transaction{
+			TransactionType: Exchange,
+			TimeTransacted:  currTime,
+		},
 		OriginUserId:      originUserId,
 		DestinationUserId: destinationUserId,
 		ItemName:          itemName,
 		ItemId:            generateUID(),
-		TimeTransacted:    currTime,
 	}
 
 	return exchTrans
 }
 
 //Returns a new Consume Transaction struct
-func (bm *Blockmanager) BuildConsumeTransaction(itemName string, consumerUserId string) Transaction {
+func (bm *Blockmanager) BuildConsumeTransaction(itemName string, consumerUserId string) TransactionProvider {
 	currTime := int64(time.Now().Unix())
 
 	// originUser == destinationUser because destination is consumer themselves
-	consumeTrans := ConsumeTransaction{
-		TransactionType:   Consume,
+	consumeTrans := &ConsumeTransaction{
+		Transaction: Transaction{
+			TransactionType: Consume,
+			TimeTransacted:  currTime,
+		},
 		OriginUserId:      consumerUserId,
 		DestinationUserId: consumerUserId,
 		ItemName:          itemName,
 		ItemId:            generateUID(),
-		TimeTransacted:    currTime,
 	}
 
 	return consumeTrans
 }
 
 //Returns a new Make Transaction struct
-func (bm *Blockmanager) BuildMakeTransaction(inputItemNames []string, inputItemIds []string, outputItemName string, makerUserId string) Transaction {
+func (bm *Blockmanager) BuildMakeTransaction(inputItemNames []string, inputItemIds []string, outputItemName string, makerUserId string) TransactionProvider {
 	currTime := int64(time.Now().Unix())
 
 	// originUser == destinationUser because destination is maker themselves
 	// list of input items -> one output item
-	makeTrans := MakeTransaction{
-		TransactionType:   Make,
+	makeTrans := &MakeTransaction{
+		Transaction: Transaction{
+			TransactionType: Make,
+			TimeTransacted:  currTime,
+		},
 		OriginUserId:      makerUserId,
 		DestinationUserId: makerUserId,
 		InputItemIds:      inputItemIds,
 		InputItemNames:    inputItemNames,
 		OutputItemName:    outputItemName,
 		OutputItemId:      generateUID(),
-		TimeTransacted:    currTime,
 	}
 
 	return makeTrans
 }
 
 //Returns a new Split Transaction struct
-func (bm *Blockmanager) BuildSplitTransaction(inputItemName string, inputItemId string, outputItemNames []string, originUserId string, destinationUserIds []string) Transaction {
+func (bm *Blockmanager) BuildSplitTransaction(inputItemName string, inputItemId string, outputItemNames []string, originUserId string, destinationUserIds []string) TransactionProvider {
 	currTime := int64(time.Now().Unix())
 
 	// generate new item Id's for each new item that's been split
@@ -215,15 +223,17 @@ func (bm *Blockmanager) BuildSplitTransaction(inputItemName string, inputItemId 
 		outputItemIds = append(outputItemIds, generateUID())
 	}
 
-	splitTrans := SplitTransaction{
-		TransactionType:    Split,
+	splitTrans := &SplitTransaction{
+		Transaction: Transaction{
+			TransactionType: Split,
+			TimeTransacted:  currTime,
+		},
 		OriginUserId:       originUserId,
 		DestinationUserIds: destinationUserIds,
 		InputItemId:        inputItemId,
 		InputItemName:      inputItemName,
 		OutputItemNames:    outputItemNames,
 		OutputItemIds:      outputItemIds,
-		TimeTransacted:     currTime,
 	}
 
 	return splitTrans
