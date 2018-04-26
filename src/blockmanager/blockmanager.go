@@ -32,31 +32,8 @@ type Block struct {
 type Blockmanager struct {
 }
 
-type Action string
-
 func main() {
 	fmt.Println("hello?")
-}
-
-//Enum for all types of transactions
-const (
-	Create   Action = "Create"
-	Exchange Action = "Exchange"
-	Consume  Action = "Consume"
-	Make     Action = "Make"
-	Split    Action = "Split"
-)
-
-//Struct to represent all Transactions
-type Transaction struct {
-	Type             Action
-	OriginUser       int64
-	DestinationUser  int64
-	InitialTimestamp int
-	FinalTimestamp   int
-
-	//Hash probably goes here as well @Sean
-	Hash string
 }
 
 var bm Blockmanager
@@ -133,9 +110,7 @@ func (bm *Blockmanager) GenerateBlock(oldBlock Block, transaction Transaction) B
 }
 
 func (bm *Blockmanager) Genesis() Block {
-	t1 := Transaction{
-		Type: "Create",
-	}
+	t1 := CreateTransaction{}
 	currTime := time.Now()
 	genesisBlock := Block{}
 	genesisBlock = Block{
@@ -159,4 +134,97 @@ func (bm *Blockmanager) isHashValid(hash string, difficulty int) bool {
 		strings.HasPrefix(hash, prefix2) ||
 		strings.HasPrefix(hash, prefix3)
 
+}
+
+//Returns a new Create Transaction struct
+func (bm *Blockmanager) BuildCreateTransaction(itemName string, userId string) Transaction {
+	currTime := int64(time.Now().Unix())
+
+	// origin user is empty string because an item is being created
+	createTrans := CreateTransaction{
+		TransactionType:   Create,
+		OriginUserId:      "",
+		DestinationUserId: userId,
+		TimeTransacted:    currTime,
+		ItemName:          itemName,
+		ItemId:            generateUID(),
+	}
+
+	return createTrans
+}
+
+//Returns a new Exchange Transaction struct
+func (bm *Blockmanager) BuildExchangeTransaction(itemName string, originUserId string, destinationUserId string) Transaction {
+	currTime := int64(time.Now().Unix())
+	exchTrans := ExchangeTransaction{
+		TransactionType:   Exchange,
+		OriginUserId:      originUserId,
+		DestinationUserId: destinationUserId,
+		ItemName:          itemName,
+		ItemId:            generateUID(),
+		TimeTransacted:    currTime,
+	}
+
+	return exchTrans
+}
+
+//Returns a new Consume Transaction struct
+func (bm *Blockmanager) BuildConsumeTransaction(itemName string, consumerUserId string) Transaction {
+	currTime := int64(time.Now().Unix())
+
+	// originUser == destinationUser because destination is consumer themselves
+	consumeTrans := ConsumeTransaction{
+		TransactionType:   Consume,
+		OriginUserId:      consumerUserId,
+		DestinationUserId: consumerUserId,
+		ItemName:          itemName,
+		ItemId:            generateUID(),
+		TimeTransacted:    currTime,
+	}
+
+	return consumeTrans
+}
+
+//Returns a new Make Transaction struct
+func (bm *Blockmanager) BuildMakeTransaction(inputItemNames []string, inputItemIds []string, outputItemName string, makerUserId string) Transaction {
+	currTime := int64(time.Now().Unix())
+
+	// originUser == destinationUser because destination is maker themselves
+	// list of input items -> one output item
+	makeTrans := MakeTransaction{
+		TransactionType:   Make,
+		OriginUserId:      makerUserId,
+		DestinationUserId: makerUserId,
+		InputItemIds:      inputItemIds,
+		InputItemNames:    inputItemNames,
+		OutputItemName:    outputItemName,
+		OutputItemId:      generateUID(),
+		TimeTransacted:    currTime,
+	}
+
+	return makeTrans
+}
+
+//Returns a new Split Transaction struct
+func (bm *Blockmanager) BuildSplitTransaction(inputItemName string, inputItemId string, outputItemNames []string, originUserId string, destinationUserIds []string) Transaction {
+	currTime := int64(time.Now().Unix())
+
+	// generate new item Id's for each new item that's been split
+	var outputItemIds []string
+	for range outputItemNames {
+		outputItemIds = append(outputItemIds, generateUID())
+	}
+
+	splitTrans := SplitTransaction{
+		TransactionType:    Split,
+		OriginUserId:       originUserId,
+		DestinationUserIds: destinationUserIds,
+		InputItemId:        inputItemId,
+		InputItemName:      inputItemName,
+		OutputItemNames:    outputItemNames,
+		OutputItemIds:      outputItemIds,
+		TimeTransacted:     currTime,
+	}
+
+	return splitTrans
 }
