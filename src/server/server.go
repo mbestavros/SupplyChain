@@ -135,10 +135,8 @@ func (sr *Server) helperVerifyBlock(w http.ResponseWriter, r *http.Request) {
 
 	if isValid {
 		sr.bcServer = append(sr.bcServer, newBlock)
-		fmt.Println("<< recieved new valid block >>")
-	} else {
-		fmt.Println("<< recieved invalid block >>")
 	}
+
 	log.Debug("server: ", sr.gr.Me)
 	log.Debug("bcserver", sr.bcServer)
 }
