@@ -12,7 +12,7 @@ Package that generates, verifies, and mines blocks
     `	ok := bm.isBlockValid(newBlock, oldBlock)`
 
 # Transactions
-Golang does not have traditional inheritance like Java. There's some hacks to get polymorphic behavior.
+Golang does not have traditional inheritance like Java. As a result, we needed some hacks to get polymorphic behavior
 
 At the top of the hierarchy, there is a `TransactionProvider` interface. Then, we have a "base" class `Transaction` struct that contains `TimeTransacted` and `TransactionType` for all subtransaction types to inherit. The "child" classes (i.e. `CreateTransaction`, etc) inherit the `Transaction` struct's attributes and can add their own attributes as well.
 
@@ -20,6 +20,8 @@ The base `Transaction` struct implements the `TransactionProvider` interface (`G
 
 Then, the `GenerateBlock` takes a generic `TransactionProvider` as a parameter, allowing it to accept any type of Transaction
 
-#### Resources
+### Resources
 - https://stackoverflow.com/questions/26027350/go-interface-fields
+  - https://play.golang.org/p/T86f6Q90goR
 - https://medium.com/golangspec/interfaces-in-go-part-iii-61f5e7c52fb5
+  - https://play.golang.org/
