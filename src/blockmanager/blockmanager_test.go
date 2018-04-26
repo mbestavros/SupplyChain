@@ -20,7 +20,12 @@ func TestGenerateMiningVerify(t *testing.T) {
 	fmt.Printf("--------------\n")
 
 	// "chain" and generate a new block
-	t2 := CreateTransaction{}
+	t2 := &CreateTransaction{
+		Transaction: Transaction{
+			TransactionType: Create,
+			TimeTransacted:  int64(time.Now().Unix()),
+		},
+	}
 	fmt.Printf("Generating a new EXCHANGE block on top of genesis block\n")
 	block1 := bm.GenerateBlock(genesisBlock, t2)
 	fmt.Printf("Block 1: %+v\n", block1)
@@ -56,8 +61,10 @@ func TestUID(t *testing.T) {
 }
 
 // if a transaction struct can succesfully pass the function parameter type check without panic, then the test is valid
-func acceptTransaction(transaction Transaction) {
-	fmt.Printf("Valid transaction type: %+v \n", transaction)
+func acceptTransaction(transaction TransactionProvider) {
+	fmt.Printf("Transaction type: %+v \n", transaction.GetTransaction().TransactionType)
+	fmt.Printf("Time transacted: %+v \n", transaction.GetTransaction().TimeTransacted)
+	fmt.Printf("Transaction: %+v \n", transaction)
 }
 
 func TestCreateTransaction(t *testing.T) {
