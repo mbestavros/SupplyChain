@@ -7,12 +7,15 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 	"server"
-	"time"
+	"strings"
+	// "time"
 )
 
 type Cli struct {
+	bm      blockmanager.Blockmanager
 	sr      server.Server
 	started bool
+	myName  string
 }
 
 func readString(prompt string) string {
@@ -71,6 +74,7 @@ func (cl *Cli) startFunc() {
 	} else {
 		myPort := readString("Your port: ")
 		myName := readString("Your name: ")
+		cl.myName = myName
 		cl.sr = server.Server{}
 		cl.sr.Genesis(myPort, myName)
 		cl.sr.Start()
@@ -86,6 +90,7 @@ func (cl *Cli) joinFunc() {
 		friendPort := readString("Your friend's port: ")
 		myPort := readString("Your port: ")
 		myName := readString("Your name: ")
+		cl.myName = myName
 		cl.sr = server.Server{}
 		cl.sr.Join(friendIP, friendPort, myPort, myName)
 		cl.sr.Start()
@@ -98,20 +103,38 @@ func (cl *Cli) transactFunc() {
 	switch transactType {
 	case "create":
 		itemName := readString("What is the item? ")
-		// TODO: create the item's transaction, make a block, verify it, and send it out
-		fmt.Println(itemName, "has an ID of xxxxxxx")
-		fmt.Println("Now to mine the relevant block and add it to the blockchain...")
-		tran := blockmanager.Transaction{
-			Type:             "create",
-			OriginUser:       0,
-			DestinationUser:  0,
-			InitialTimestamp: time.Now().Second(),
-			Hash:             "temporary"}
+		fmt.Println("Creating an item, adding it to the blockchain...")
+		tran := cl.bm.BuildCreateTransaction(itemName, cl.myName)
 		cl.sr.NewTransaction(tran)
 	case "exchange":
+		itemName := readString("What is the item? ")
+		recipientName := readString("Who are you sending it to? ")
+		fmt.Println("Exchanging it on the blockchain...")
+		tran := cl.bm.BuildExchangeTransaction(itemName, cl.myName, recipientName)
+		cl.sr.NewTransaction(tran)
 	case "consume":
+		itemName := readString("What is the item? ")
+		fmt.Println("Consuming it from the blockchain...")
+		tran := cl.bm.BuildConsumeTransaction(itemName, cl.myName)
+		cl.sr.NewTransaction(tran)
 	case "make":
+		itemNames := strings.Split(readString("What are the items? (List names separated by commas) "), ",")
+		itemIDs := strings.Split(readString("What are the items? (List IDs separated by commas) "), ",")
+		outputItem := readString("What are you making? ")
+		fmt.Println("Making it on the blockchain...")
+		tran := cl.bm.BuildMakeTransaction(itemNames, itemIDs, outputItem, cl.myName)
+		cl.sr.NewTransaction(tran)
 	case "split":
+		inputItemName := readString("What are you splitting? (name) ")
+		inputItemID := readString("What are you splitting? (ID) ")
+		outputNames := strings.Split(readString("What are the items? (List names separated by commas) "), ",")
+		fmt.Println("Splitting it on the blockchain...")
+		recipients := make([]string, len(outputNames))
+		for i := range recipients {
+			recipients[i] = cl.myName
+		}
+		tran := cl.bm.BuildSplitTransaction(inputItemName, inputItemID, outputNames, cl.myName, recipients)
+		cl.sr.NewTransaction(tran)
 	default:
 		fmt.Println("Transaction type not recognized.")
 	}
