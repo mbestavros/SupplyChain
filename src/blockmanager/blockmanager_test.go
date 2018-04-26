@@ -64,9 +64,9 @@ func TestCreateTransaction(t *testing.T) {
 	// initialize block manager
 	bm := Blockmanager{}
 
-	trans := bm.BuildCreateTransaction("Diamonds", 1337)
+	trans := bm.BuildCreateTransaction("Diamonds", "l33t")
 	acceptTransaction(trans)
-	fmt.Println("User 1337 created Diamonds")
+	fmt.Println("User l33t created Diamonds")
 	fmt.Println()
 }
 
@@ -74,9 +74,9 @@ func TestExchangeTransaction(t *testing.T) {
 	// initialize block manager
 	bm := Blockmanager{}
 
-	trans := bm.BuildExchangeTransaction("Diamonds", 1337, 1338)
+	trans := bm.BuildExchangeTransaction("Diamonds", "l33t", "l33a")
 	acceptTransaction(trans)
-	fmt.Println("Exchange diamonds from user 1337 to 1338")
+	fmt.Println("Exchange diamonds from user l33t to l33a")
 	fmt.Println()
 }
 
@@ -84,9 +84,9 @@ func TestConsumeTransaction(t *testing.T) {
 	// initialize block manager
 	bm := Blockmanager{}
 
-	trans := bm.BuildConsumeTransaction("Eggs", 1337)
+	trans := bm.BuildConsumeTransaction("Eggs", "l337")
 	acceptTransaction(trans)
-	fmt.Println("User 1337 consumed Eggs")
+	fmt.Println("User l337 consumed Eggs")
 	fmt.Println()
 }
 
@@ -96,9 +96,9 @@ func TestMakeTransaction(t *testing.T) {
 
 	inputItemNames := []string{"Eggs", "Milk", "Icing"}
 	inputItemIds := []string{"123Eggs", "23Milkz", "icIng143"}
-	trans := bm.BuildMakeTransaction(inputItemNames, inputItemIds, "Cake", 1337)
+	trans := bm.BuildMakeTransaction(inputItemNames, inputItemIds, "Cake", "l337")
 	acceptTransaction(trans)
-	fmt.Println("User 1337 made Cake from [Eggs, Milk, Icing]")
+	fmt.Println("User l337 made Cake from [Eggs, Milk, Icing]")
 	fmt.Println()
 }
 
@@ -107,9 +107,9 @@ func TestSplitTransaction(t *testing.T) {
 	bm := Blockmanager{}
 
 	outputItemNames := []string{"1/2 Sushi roll", "1/2 Sushi roll"}
-	destinationUserIds := []int64{1338, 1339}
-	trans := bm.BuildSplitTransaction("Sushi roll", "14SuZhiRoll", outputItemNames, 1337, destinationUserIds)
+	destinationUserIds := []string{"l33a", "l33b"}
+	trans := bm.BuildSplitTransaction("Sushi roll", "14SuZhiRoll", outputItemNames, "l337", destinationUserIds)
 	acceptTransaction(trans)
-	fmt.Println("User 1337 split Sushi roll with User 1338 and User 11339")
+	fmt.Println("User l337 split Sushi roll with User l33a and User l33b")
 	fmt.Println()
 }
