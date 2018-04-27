@@ -125,7 +125,7 @@ func TestItemHistory(t *testing.T){
 	var bcServerTest []Block
 	genesisBlock := bm.Genesis()
 	bcServerTest = append(bcServerTest, genesisBlock)
-	
+
 	create_trans := CreateTransaction{
 		OriginUserId: "-1",
 		DestinationUserId: "shreya1",
@@ -173,10 +173,43 @@ func TestItemHistory(t *testing.T){
 
 	block3 := bm.GenerateBlock(block2, create_scarf)
 	bcServerTest = append(bcServerTest, block3)
-	
+
 	gucci_transactions := bm.GetItemHistory("gucci_test", bcServerTest)
 
 	if len(gucci_transactions) == 2 && len(bcServerTest) == 4 {
 		fmt.Println("We gucci ;)")
+	}
+}
+
+
+
+func TestItemsOfOwner(t *testing.T){
+	bm := Blockmanager{}
+
+	var bcServerTest []Block
+	genesisBlock := bm.Genesis()
+	bcServerTest = append(bcServerTest, genesisBlock)
+
+	create_trans := CreateTransaction{
+		OriginUserId: "1",
+		DestinationUserId: "mike",
+		ItemId: "gucci_test",
+		ItemName: "Gucci bag",
+	}
+
+	create_gucci := Transaction{
+		TransactionType: Create,
+		TimeTransacted:  int64(time.Now().Unix()),
+		Cr: create_trans,
+	}
+
+	block1 := bm.GenerateBlock(genesisBlock, create_gucci)
+	bcServerTest = append(bcServerTest, block1)
+
+	gucci_transactions := bm.GetItemsOfOwner("mike", bcServerTest)
+
+	if len(gucci_transactions) == 1 && len(bcServerTest) == 1{
+		fmt.Println(gucci_transactions)
+		fmt.Println("Eskettit")
 	}
 }

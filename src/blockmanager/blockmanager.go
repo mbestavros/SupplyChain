@@ -308,6 +308,83 @@ func (bm *Blockmanager) BlockFollowsRules(block Block, bc []Block) bool {
 	return true
 }
 
+//A function that takes a userID as an input and returns the Items they currently own.
+func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Transaction{
+	var result []Transaction
+	transactionsMap := make(map[string]string)
+	for block_i := 1; block_i < len(bcServer); block_i++ {
+		block := bcServer[block_i]
+		transaction := block.BlockTransaction
+		switch transType := transaction.TransactionType; transType {
+
+		//If the destinationUser of the block matches the userID, we check to see if that block is already in the map.
+		//If it is, we delete it and replace it with this transaction, to ensure we don't tell the user they own a block
+		//that they had previously sold. Otherwise, we just add it to the map.
+		//Note that they values could really be anything, in the end I just print out the keys.
+
+		case Split:
+			splitTrans := transaction.Sp
+			if splitTrans.OriginUserId == userID{ // If the origin is the user, then they must no longer own the block
+				delete(transactionsMap, splitTrans.OutputItemName)
+			} else {
+			for i := 0; i <= len(splitTrans.DestinationUserIds); i++{
+				if splitTrans.DestinationUserIds[i] == userID {
+					if val, ok := transactionsMap[splitTrans.OutputItemName]; ok{
+						delete(transactionsMap, splitTrans.OutputItemName)
+					}
+					transactionsMap[splitTrans.OutputItemName] = userID
+					break
+				}
+			}
+		}
+
+
+		case Make:
+			makeTrans := transaction.Ma
+			if makeTrans.DestinationUserId == userID {
+				if val, ok := transactionsMap[makeTrans.OutputItemName]; ok{
+					delete(transactionsMap, makeTrans.OutputItemName)
+				}
+				transactionsMap[makeTrans.OutputItemName] = userID
+			}
+
+		case Create:
+			createTrans := transaction.Cr
+			if createTrans.DestinationUserId == userID {
+				if val, ok := transactionsMap[createTrans.ItemName]; ok{
+					delete(transactionsMap, makeTrans.ItemName)
+				}
+				transactionsMap[makeTrans.ItemName] = userID
+			}
+
+		case Exchange:
+			exchangeTrans := transaction.Ex
+			if exchangeTrans.OriginUserId == userID{ // If the origin is the user, then they must no longer own the block
+				delete(transactionsMap, exchangeTrans.ItemName)
+			} else if exchangeTrans.DestinationUserId == userID {
+				if val, ok := transactionsMap[exchangeTrans.ItemName]; ok{
+					delete(transactionsMap, exchangeTrans.ItemName)
+				}
+				transactionsMap[makeTrans.ItemName] = userID
+			}
+
+		case Consume:
+			consumeTrans := transaction.Co
+			if consumeTrans.DestinationUserId == userID {
+				if val, ok := transactionsMap[consumeTrans.ItemName]; ok{
+					delete(transactionsMap, consumeTrans.ItemName)
+				}
+				transactionsMap[consumeTrans.ItemName] = userID
+			}
+	}
+	var result []Transaction
+	for k := range m {
+    result = append(result, k)
+}
+	return result
+
+}
+
 // History of an item
 func (bm *Blockmanager) GetItemHistory(itemId string, bcServer []Block) []Transaction {
 	var result []Transaction
