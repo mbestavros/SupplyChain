@@ -150,7 +150,7 @@ func (cl *Cli) transactFunc() {
 
 func (cl *Cli) lookupFunc() {
 	itemID := readString("Item ID: ")
-	fmt.Println("Completed lookup for", itemID)
+	cl.sr.LookupItem(itemID)
 }
 
 func (cl *Cli) quitCommand() {

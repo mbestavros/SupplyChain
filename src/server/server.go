@@ -127,6 +127,26 @@ func (sr *Server) helperJoinGetBlock(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(sr.bcServer)
 }
 
+func (sr *Server) LookupItem(id string) {
+	transacts := sr.bm.GetItemHistory(id, sr.bcServer)
+	for ind, trans := range transacts {
+		fmt.Print("Transaction ", ind, ": ", trans.TransactionType)
+		switch trans.TransactionType {
+		case "Create":
+			fmt.Print(trans.Cr.OriginUserId)
+		case "Exchange":
+			fmt.Print(trans.Ex.OriginUserId, "->", trans.Ex.DestinationUserId)
+		case "Consume":
+			fmt.Print(trans.Co.OriginUserId, "-> CONSUMED")
+		case "Make":
+			fmt.Print(trans.Ma.InputItemNames, "->", trans.Ma.OutputItemName)
+		case "Split":
+			fmt.Print(trans.Sp.InputItemName, "->", trans.Sp.OutputItemNames)
+		}
+		fmt.Print("\n")
+	}
+}
+
 func (sr *Server) UndoBlock() {
 	sr.bcServer = sr.bcServer[:len(sr.bcServer)-1]
 }
