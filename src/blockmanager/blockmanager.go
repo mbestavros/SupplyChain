@@ -309,8 +309,7 @@ func (bm *Blockmanager) BlockFollowsRules(block Block, bc []Block) bool {
 }
 
 //A function that takes a userID as an input and returns the Items they currently own.
-func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Transaction{
-	var result []Transaction
+func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []string{
 	transactionsMap := make(map[string]string)
 	for block_i := 1; block_i < len(bcServer); block_i++ {
 		block := bcServer[block_i]
@@ -326,12 +325,11 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Trans
 			splitTrans := transaction.Sp
 			for i := 0; i <= len(splitTrans.DestinationUserIds); i++{
 				if splitTrans.DestinationUserIds[i] == userID {
-					if val, ok := transactionsMap[splitTrans.OutputItemName]; ok{
+					if val, ok := transactionsMap[splitTrans.OutputItemNames[i]]; ok{
 						fmt.Println(val)
-						delete(transactionsMap, splitTrans.OutputItemName)
+						delete(transactionsMap, splitTrans.OutputItemNames[i])
 					}
-					transactionsMap[splitTrans.OutputItemName] = userID
-					break
+					transactionsMap[splitTrans.OutputItemNames[i]] = userID
 				}
 		}
 
@@ -351,9 +349,9 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Trans
 			if createTrans.DestinationUserId == userID {
 				if val, ok := transactionsMap[createTrans.ItemName]; ok{
 					fmt.Println(val)
-					delete(transactionsMap, makeTrans.ItemName)
+					delete(transactionsMap, createTrans.ItemName)
 				}
-				transactionsMap[makeTrans.ItemName] = userID
+				transactionsMap[createTrans.ItemName] = userID
 			}
 
 		case Exchange:
@@ -365,7 +363,7 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Trans
 					fmt.Println(val)
 					delete(transactionsMap, exchangeTrans.ItemName)
 				}
-				transactionsMap[makeTrans.ItemName] = userID
+				transactionsMap[exchangeTrans.ItemName] = userID
 			}
 
 		case Consume:
@@ -378,12 +376,13 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Trans
 				transactionsMap[consumeTrans.ItemName] = userID
 			}
 	}
-	var result []Transaction
-	for k := range transactionsMap {
-    result = append(result, k)
-}
-	return result
 
+}
+var result []string
+for k := range transactionsMap {
+	result = append(result, k)
+}
+return result
 }
 
 // History of an item
