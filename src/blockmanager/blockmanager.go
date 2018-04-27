@@ -223,3 +223,67 @@ func (bm *Blockmanager) BuildSplitTransaction(inputItemName string, inputItemId 
 	}
 
 }
+
+// History of an item
+func (bm *Blockmanager) GetItemHistory(itemId string, bcServer []Block) []Transaction{
+	var result []Transaction
+
+	// Start at 1 to skip genesis
+	for block_i := 1; block_i < len(bcServer); block_i++ {
+		block := bcServer[block_i]
+		transaction := block.BlockTransaction
+
+		switch transType := transaction.TransactionType; transType {
+		
+		case Split:
+			splitTrans := transaction.Sp
+			if splitTrans.InputItemId == itemId {
+
+				result = append(result, transaction)
+			} else {
+				for i := range splitTrans.OutputItemIds {
+					outputId := splitTrans.OutputItemIds[i]
+					if outputId == itemId {
+						result = append(result, transaction)
+					}
+				}
+			}
+		
+		case Make:
+			makeTrans := transaction.Ma
+			if makeTrans.OutputItemId == itemId {
+				result = append(result, transaction)
+			} else {
+				for i := range makeTrans.InputItemIds {
+					inputId := makeTrans.InputItemIds[i]
+					if inputId == itemId {
+						result = append(result, transaction)
+					}
+				}
+			}
+			
+		case Create:
+			createTrans := transaction.Cr
+			if createTrans.ItemId == itemId {
+				result = append(result, transaction)
+			}
+
+		case Exchange:
+			exchangeTrans := transaction.Ex
+			if exchangeTrans.ItemId == itemId {
+				result = append(result, transaction)
+			}
+
+		case Consume:
+			consumeTrans := transaction.Co
+			if consumeTrans.ItemId == itemId {
+				result = append(result, transaction)
+			}
+
+		default:
+			fmt.Println("error: none of the transaction types have a value")
+			return result
+		}
+	}
+	return result
+}

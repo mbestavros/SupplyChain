@@ -20,11 +20,9 @@ func TestGenerateMiningVerify(t *testing.T) {
 	fmt.Printf("--------------\n")
 
 	// "chain" and generate a new block
-	t2 := &CreateTransaction{
-		Transaction: Transaction{
-			TransactionType: Create,
-			TimeTransacted:  int64(time.Now().Unix()),
-		},
+	t2 := Transaction{
+		TransactionType: Create,
+		TimeTransacted:  int64(time.Now().Unix()),
 	}
 	fmt.Printf("Generating a new EXCHANGE block on top of genesis block\n")
 	block1 := bm.GenerateBlock(genesisBlock, t2)
@@ -61,9 +59,9 @@ func TestUID(t *testing.T) {
 }
 
 // if a transaction struct can succesfully pass the function parameter type check without panic, then the test is valid
-func acceptTransaction(transaction TransactionProvider) {
-	fmt.Printf("Transaction type: %+v \n", transaction.GetTransaction().TransactionType)
-	fmt.Printf("Time transacted: %+v \n", transaction.GetTransaction().TimeTransacted)
+func acceptTransaction(transaction Transaction) {
+	fmt.Printf("Transaction type: %+v \n", transaction.TransactionType)
+	fmt.Printf("Time transacted: %+v \n", transaction.TimeTransacted)
 	fmt.Printf("Transaction: %+v \n", transaction)
 }
 
@@ -119,4 +117,66 @@ func TestSplitTransaction(t *testing.T) {
 	acceptTransaction(trans)
 	fmt.Println("User l337 split Sushi roll with User l33a and User l33b")
 	fmt.Println()
+}
+
+func TestItemHistory(t *testing.T){
+	bm := Blockmanager{}
+
+	var bcServerTest []Block
+	genesisBlock := bm.Genesis()
+	bcServerTest = append(bcServerTest, genesisBlock)
+	
+	create_trans := CreateTransaction{
+		OriginUserId: "-1",
+		DestinationUserId: "shreya1",
+		ItemId: "gucci_test",
+		ItemName: "Gucci bag",
+	}
+
+	create_gucci := Transaction{
+		TransactionType: Create,
+		TimeTransacted:  int64(time.Now().Unix()),
+		Cr: create_trans,
+	}
+
+	block1 := bm.GenerateBlock(genesisBlock, create_gucci)
+	bcServerTest = append(bcServerTest, block1)
+
+	exchange_trans := ExchangeTransaction{
+		OriginUserId: "shreya1",
+		DestinationUserId: "shreya2",
+		ItemId: "gucci_test",
+		ItemName: "Gucci bag",
+	}
+
+	exchange_gucci := Transaction{
+		TransactionType: Exchange,
+		TimeTransacted:  int64(time.Now().Unix()),
+		Ex: exchange_trans,
+	}
+
+	block2 := bm.GenerateBlock(block1, exchange_gucci)
+	bcServerTest = append(bcServerTest, block2)
+
+	create_trans2 := CreateTransaction{
+		OriginUserId: "-1",
+		DestinationUserId: "shreya1",
+		ItemId: "scarf_test",
+		ItemName: "Scarf",
+	}
+
+	create_scarf := Transaction {
+		TransactionType: Create,
+		TimeTransacted: int64(time.Now().Unix()),
+		Cr: create_trans2,
+	}
+
+	block3 := bm.GenerateBlock(block2, create_scarf)
+	bcServerTest = append(bcServerTest, block3)
+	
+	gucci_transactions := bm.GetItemHistory("gucci_test", bcServerTest)
+
+	if len(gucci_transactions) == 2 && len(bcServerTest) == 4 {
+		fmt.Println("We gucci ;)")
+	}
 }
