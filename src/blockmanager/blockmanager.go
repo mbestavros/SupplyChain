@@ -324,9 +324,6 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Trans
 
 		case Split:
 			splitTrans := transaction.Sp
-			if splitTrans.OriginUserId == userID{ // If the origin is the user, then they must no longer own the block
-				delete(transactionsMap, splitTrans.OutputItemName)
-			} else {
 			for i := 0; i <= len(splitTrans.DestinationUserIds); i++{
 				if splitTrans.DestinationUserIds[i] == userID {
 					if val, ok := transactionsMap[splitTrans.OutputItemName]; ok{
@@ -335,7 +332,6 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Trans
 					transactionsMap[splitTrans.OutputItemName] = userID
 					break
 				}
-			}
 		}
 
 
