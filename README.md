@@ -1,12 +1,13 @@
 # CS651-Spr18-Final-Project
 Final project for CS651: Distributed Systems. Blockchain mixed with distributed systems.
 
-Setup:
+Setup
 
-* Set your GOPATH variable to be the root folder of this repo, and go to that folder. You can do this by navigating to the main directory and running "GOPATH=\$(pwd)"
+* Set your GOPATH variable to be the root folder of this repo, and go to that folder. You can do this by navigating to the main directory and running:  
+`GOPATH=\$(pwd)`
 
-Run the following to get required packages:
-`go get github.com/rs/xid`
+* Run the following to get required packages:  
+`go get github.com/rs/xid`  
 `go get github.com/sirupsen/logrus`
 
 Structure:
