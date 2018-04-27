@@ -327,6 +327,7 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Trans
 			for i := 0; i <= len(splitTrans.DestinationUserIds); i++{
 				if splitTrans.DestinationUserIds[i] == userID {
 					if val, ok := transactionsMap[splitTrans.OutputItemName]; ok{
+						fmt.Println(val)
 						delete(transactionsMap, splitTrans.OutputItemName)
 					}
 					transactionsMap[splitTrans.OutputItemName] = userID
@@ -339,6 +340,7 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Trans
 			makeTrans := transaction.Ma
 			if makeTrans.DestinationUserId == userID {
 				if val, ok := transactionsMap[makeTrans.OutputItemName]; ok{
+					fmt.Println(val)
 					delete(transactionsMap, makeTrans.OutputItemName)
 				}
 				transactionsMap[makeTrans.OutputItemName] = userID
@@ -348,6 +350,7 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Trans
 			createTrans := transaction.Cr
 			if createTrans.DestinationUserId == userID {
 				if val, ok := transactionsMap[createTrans.ItemName]; ok{
+					fmt.Println(val)
 					delete(transactionsMap, makeTrans.ItemName)
 				}
 				transactionsMap[makeTrans.ItemName] = userID
@@ -359,6 +362,7 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Trans
 				delete(transactionsMap, exchangeTrans.ItemName)
 			} else if exchangeTrans.DestinationUserId == userID {
 				if val, ok := transactionsMap[exchangeTrans.ItemName]; ok{
+					fmt.Println(val)
 					delete(transactionsMap, exchangeTrans.ItemName)
 				}
 				transactionsMap[makeTrans.ItemName] = userID
@@ -368,13 +372,14 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []Trans
 			consumeTrans := transaction.Co
 			if consumeTrans.DestinationUserId == userID {
 				if val, ok := transactionsMap[consumeTrans.ItemName]; ok{
+					fmt.Println(val)
 					delete(transactionsMap, consumeTrans.ItemName)
 				}
 				transactionsMap[consumeTrans.ItemName] = userID
 			}
 	}
 	var result []Transaction
-	for k := range m {
+	for k := range transactionsMap {
     result = append(result, k)
 }
 	return result
