@@ -130,7 +130,7 @@ func (sr *Server) helperJoinGetBlock(w http.ResponseWriter, r *http.Request) {
 func (sr *Server) LookupItem(id string) {
 	transacts := sr.bm.GetItemHistory(id, sr.bcServer)
 	for ind, trans := range transacts {
-		fmt.Print("Transaction ", ind, ": ", trans.TransactionType)
+		fmt.Print("Transaction ", ind, ": ", trans.TransactionType+" ... ")
 		switch trans.TransactionType {
 		case "Create":
 			fmt.Print(trans.Cr.OriginUserId)
