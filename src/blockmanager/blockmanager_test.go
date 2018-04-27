@@ -1,3 +1,4 @@
+
 package blockmanager
 
 import (
@@ -79,7 +80,7 @@ func TestExchangeTransaction(t *testing.T) {
 	// initialize block manager
 	bm := Blockmanager{}
 
-	trans := bm.BuildExchangeTransaction("Diamonds", "l33t", "l33a")
+	trans := bm.BuildExchangeTransaction("Diamonds", "l33t", "l33a", "mike")
 	acceptTransaction(trans)
 	fmt.Println("Exchange diamonds from user l33t to l33a")
 	fmt.Println()
@@ -182,7 +183,6 @@ func TestItemHistory(t *testing.T){
 }
 
 
-
 func TestItemsOfOwner(t *testing.T){
 	bm := Blockmanager{}
 
@@ -191,8 +191,8 @@ func TestItemsOfOwner(t *testing.T){
 	bcServerTest = append(bcServerTest, genesisBlock)
 
 	create_trans := CreateTransaction{
-		OriginUserId: "1",
-		DestinationUserId: "mike",
+		OriginUserId: "-1",
+		DestinationUserId: "shreya1",
 		ItemId: "gucci_test",
 		ItemName: "Gucci bag",
 	}
@@ -206,10 +206,37 @@ func TestItemsOfOwner(t *testing.T){
 	block1 := bm.GenerateBlock(genesisBlock, create_gucci)
 	bcServerTest = append(bcServerTest, block1)
 
-	gucci_transactions := bm.GetItemsOfOwner("mike", bcServerTest)
-
-	if len(gucci_transactions) == 1 && len(bcServerTest) == 1{
-		fmt.Println(gucci_transactions)
-		fmt.Println("Eskettit")
+	exchange_trans := ExchangeTransaction{
+		OriginUserId: "shreya1",
+		DestinationUserId: "shreya2",
+		ItemId: "gucci_test",
+		ItemName: "Gucci bag",
 	}
+
+	exchange_gucci := Transaction{
+		TransactionType: Exchange,
+		TimeTransacted:  int64(time.Now().Unix()),
+		Ex: exchange_trans,
+	}
+
+	block2 := bm.GenerateBlock(block1, exchange_gucci)
+	bcServerTest = append(bcServerTest, block2)
+
+	create_trans2 := CreateTransaction{
+		OriginUserId: "-1",
+		DestinationUserId: "shreya1",
+		ItemId: "scarf_test",
+		ItemName: "Scarf",
+	}
+
+	create_scarf := Transaction {
+		TransactionType: Create,
+		TimeTransacted: int64(time.Now().Unix()),
+		Cr: create_trans2,
+	}
+
+	block3 := bm.GenerateBlock(block2, create_scarf)
+	bcServerTest = append(bcServerTest, block3)
+
+	fmt.Println(bm.GetItemsOfOwner("shreya1", bcServerTest))
 }

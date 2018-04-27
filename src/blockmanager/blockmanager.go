@@ -323,66 +323,127 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []strin
 
 		case Split:
 			splitTrans := transaction.Sp
+			if val, ok := transactionsMap[splitTrans.InputItemId]; ok{
+				fmt.Println(val)
+				delete(transactionsMap, splitTrans.InputItemId)
+			}
 			for i := 0; i <= len(splitTrans.DestinationUserIds); i++{
 				if splitTrans.DestinationUserIds[i] == userID {
-					if val, ok := transactionsMap[splitTrans.OutputItemNames[i]]; ok{
-						fmt.Println(val)
-						delete(transactionsMap, splitTrans.OutputItemNames[i])
-					}
-					transactionsMap[splitTrans.OutputItemNames[i]] = userID
+					for i := 0; i <= len(splitTrans.OutputItemIds); i++{
+						if val, ok := transactionsMap[splitTrans.OutputItemIds[i]]; ok{
+							fmt.Println(val)
+							delete(transactionsMap, splitTrans.OutputItemIds[i])
+						}
+					transactionsMap[splitTrans.OutputItemIds[i]] = userID
 				}
+			}
 		}
 
 
 		case Make:
 			makeTrans := transaction.Ma
-			if makeTrans.DestinationUserId == userID {
-				if val, ok := transactionsMap[makeTrans.OutputItemName]; ok{
+			for i := 0; i <= len(makeTrans.InputItemIds); i++{
+				if val, ok := transactionsMap[makeTrans.InputItemIds[i]]; ok{
 					fmt.Println(val)
-					delete(transactionsMap, makeTrans.OutputItemName)
+					delete(transactionsMap, makeTrans.OutputItemId)
 				}
-				transactionsMap[makeTrans.OutputItemName] = userID
+			}
+			if makeTrans.DestinationUserId == userID {
+				if val, ok := transactionsMap[makeTrans.OutputItemId]; ok{
+					fmt.Println(val)
+					delete(transactionsMap, makeTrans.OutputItemId)
+				}
+				transactionsMap[makeTrans.OutputItemId] = userID
 			}
 
 		case Create:
 			createTrans := transaction.Cr
 			if createTrans.DestinationUserId == userID {
-				if val, ok := transactionsMap[createTrans.ItemName]; ok{
+				if val, ok := transactionsMap[createTrans.ItemId]; ok{
 					fmt.Println(val)
-					delete(transactionsMap, createTrans.ItemName)
+					delete(transactionsMap, createTrans.ItemId)
 				}
-				transactionsMap[createTrans.ItemName] = userID
+				transactionsMap[createTrans.ItemId] = userID
 			}
 
 		case Exchange:
 			exchangeTrans := transaction.Ex
 			if exchangeTrans.OriginUserId == userID{ // If the origin is the user, then they must no longer own the block
-				delete(transactionsMap, exchangeTrans.ItemName)
+				delete(transactionsMap, exchangeTrans.ItemId)
 			} else if exchangeTrans.DestinationUserId == userID {
-				if val, ok := transactionsMap[exchangeTrans.ItemName]; ok{
+				if val, ok := transactionsMap[exchangeTrans.ItemId]; ok{
 					fmt.Println(val)
-					delete(transactionsMap, exchangeTrans.ItemName)
+					delete(transactionsMap, exchangeTrans.ItemId)
 				}
-				transactionsMap[exchangeTrans.ItemName] = userID
+				transactionsMap[exchangeTrans.ItemId] = userID
 			}
 
 		case Consume:
 			consumeTrans := transaction.Co
 			if consumeTrans.DestinationUserId == userID {
-				if val, ok := transactionsMap[consumeTrans.ItemName]; ok{
+				if val, ok := transactionsMap[consumeTrans.ItemId]; ok{
 					fmt.Println(val)
-					delete(transactionsMap, consumeTrans.ItemName)
+					delete(transactionsMap, consumeTrans.ItemId)
 				}
-				transactionsMap[consumeTrans.ItemName] = userID
+				transactionsMap[consumeTrans.ItemId] = userID
 			}
 	}
 
+	}
+	var result []string
+	for k := range transactionsMap {
+		x := bm.ItemIdToItemNameHelper(k, bcServer)
+		result = append(result, x)
+	}
+	return result
 }
-var result []string
-for k := range transactionsMap {
-	result = append(result, k)
-}
-return result
+
+//Helper that takes in an itemid and returns the item's name
+func (bm *Blockmanager) ItemIdToItemNameHelper(itemId string, bcServer []Block) string {
+	for block_i := 1; block_i < len(bcServer); block_i++ {
+		block := bcServer[block_i]
+		transaction := block.BlockTransaction
+		switch transType := transaction.TransactionType; transType {
+
+		case Split:
+			splitTrans := transaction.Sp
+			for i := 0; i < len(splitTrans.OutputItemIds); i++{
+				if splitTrans.OutputItemIds[i] == itemId{
+					return splitTrans.OutputItemIds[i]
+				}
+			}
+
+
+		case Make:
+			makeTrans := transaction.Ma
+			if makeTrans.OutputItemId == itemId {
+				return makeTrans.OutputItemName
+			}
+
+
+		case Create:
+			createTrans := transaction.Cr
+			if createTrans.ItemId == itemId {
+				return createTrans.ItemName
+			}
+
+
+		case Exchange:
+			exchangeTrans := transaction.Ex
+			if exchangeTrans.ItemId == itemId {
+				return exchangeTrans.ItemName
+			}
+
+
+
+		case Consume:
+			consumeTrans := transaction.Co
+			if consumeTrans.ItemId == itemId {
+				return consumeTrans.ItemName
+			}
+		}
+	}
+	return ""
 }
 
 // History of an item
