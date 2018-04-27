@@ -127,14 +127,21 @@ func (sr *Server) helperJoinGetBlock(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(sr.bcServer)
 }
 
+func (sr *Server) UndoBlock() {
+	sr.bcServer = sr.bcServer[:len(sr.bcServer)-1]
+}
+
 // Helper for receiving a block, checking if it's valid
 func (sr *Server) helperVerifyBlock(w http.ResponseWriter, r *http.Request) {
 	newBlock := blockmanager.Block{}
 	json.NewDecoder(r.Body).Decode(&newBlock)
-	isValid := sr.bm.IsBlockValid(newBlock, sr.bcServer[len(sr.bcServer)-1])
 
-	if isValid {
-		sr.bcServer = append(sr.bcServer, newBlock)
+	followsRules := sr.bm.BlockFollowsRules(newBlock, sr.bcServer)
+	if followsRules {
+		isValid := sr.bm.IsBlockValid(newBlock, sr.bcServer[len(sr.bcServer)-1])
+		if isValid {
+			sr.bcServer = append(sr.bcServer, newBlock)
+		}
 	}
 
 	log.Debug("server: ", sr.gr.Me)

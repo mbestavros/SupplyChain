@@ -56,6 +56,8 @@ func main() {
 			cl.transactFunc()
 		case "lookup":
 			cl.lookupFunc()
+		case "undo block":
+			cl.sr.UndoBlock()
 		default:
 			fmt.Println("Unrecognized command. Type \"help\" for a list of commands")
 		}
@@ -105,17 +107,19 @@ func (cl *Cli) transactFunc() {
 		itemName := readString("What is the item? ")
 		fmt.Println("Creating an item, adding it to the blockchain...")
 		tran := cl.bm.BuildCreateTransaction(itemName, cl.myName)
+		fmt.Println("ItemID", tran.Cr.ItemId)
 		cl.sr.NewTransaction(tran)
 	case "exchange":
 		itemName := readString("What is the item? ")
+		itemId := readString("What is the ID? ")
 		recipientName := readString("Who are you sending it to? ")
 		fmt.Println("Exchanging it on the blockchain...")
-		tran := cl.bm.BuildExchangeTransaction(itemName, cl.myName, recipientName)
+		tran := cl.bm.BuildExchangeTransaction(itemName, itemId, cl.myName, recipientName)
 		cl.sr.NewTransaction(tran)
 	case "consume":
-		itemName := readString("What is the item? ")
+		itemId := readString("What is the ID? ")
 		fmt.Println("Consuming it from the blockchain...")
-		tran := cl.bm.BuildConsumeTransaction(itemName, cl.myName)
+		tran := cl.bm.BuildConsumeTransaction(itemId, cl.myName)
 		cl.sr.NewTransaction(tran)
 	case "make":
 		itemNames := strings.Split(readString("What are the items? (List names separated by commas) "), ",")
@@ -123,6 +127,7 @@ func (cl *Cli) transactFunc() {
 		outputItem := readString("What are you making? ")
 		fmt.Println("Making it on the blockchain...")
 		tran := cl.bm.BuildMakeTransaction(itemNames, itemIDs, outputItem, cl.myName)
+		fmt.Println(tran.Ma.OutputItemName, ":", tran.Ma.OutputItemId)
 		cl.sr.NewTransaction(tran)
 	case "split":
 		inputItemName := readString("What are you splitting? (name) ")
@@ -134,6 +139,9 @@ func (cl *Cli) transactFunc() {
 			recipients[i] = cl.myName
 		}
 		tran := cl.bm.BuildSplitTransaction(inputItemName, inputItemID, outputNames, cl.myName, recipients)
+		for ind, name := range tran.Sp.OutputItemNames {
+			fmt.Println(name, ":", tran.Sp.OutputItemIds[ind])
+		}
 		cl.sr.NewTransaction(tran)
 	default:
 		fmt.Println("Transaction type not recognized.")

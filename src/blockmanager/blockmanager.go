@@ -45,22 +45,37 @@ func generateUID() string {
 // make sure block is valid by checking index, and comparing the hash of the previous block
 func (bm *Blockmanager) IsBlockValid(newBlock Block, oldBlock Block) bool {
 	if oldBlock.Index+1 != newBlock.Index {
-		fmt.Println(" << recieved invalid block: index mismatch >>")
+		fmt.Println(" << invalid block: index mismatch >>")
 		return false
 	}
 
 	if oldBlock.Hash != newBlock.PrevHash {
-		fmt.Println(" << recieved invalid block: previous hash mismatch >>")
+		fmt.Println(" << invalid block: previous hash mismatch >>")
 		return false
 	}
 
 	if bm.calculateHash(newBlock) != newBlock.Hash {
-		fmt.Println(" << recieved invalid block: self hash mismatch >>")
+		fmt.Println(" << invalid block: self hash mismatch >>")
 		return false
 	}
 
-	fmt.Println(" << recieved valid block:", newBlock.BlockTransaction.TransactionType, " >>")
-	// more logging here
+	// VALID BLOCK
+	fmt.Println("<< valid block:", newBlock.BlockTransaction.TransactionType, " >>")
+	trans := newBlock.BlockTransaction
+	switch trans.TransactionType {
+	case Create:
+		fmt.Println("<<", trans.Cr.OriginUserId, "created", trans.Cr.ItemName, ">>")
+	case Exchange:
+		fmt.Println("<<", trans.Ex.OriginUserId, "exchanged",
+			trans.Ex.ItemName, "to", trans.Ex.DestinationUserId, ">>")
+	case Consume:
+		fmt.Println("<<", trans.Co.OriginUserId, "consumed", trans.Co.ItemName, ">>")
+	case Make:
+		fmt.Println("<<", trans.Ma.OriginUserId, "maked", trans.Ma.OutputItemName, "from", trans.Ma.InputItemNames, ">>")
+	case Split:
+		fmt.Println("<<", trans.Sp.OriginUserId, "split", trans.Sp.InputItemName, "into", trans.Sp.OutputItemNames, ">>")
+	}
+
 	return true
 }
 
@@ -135,19 +150,19 @@ func (bm *Blockmanager) isHashValid(hash string, difficulty int) bool {
 	prefix := strings.Repeat("0", difficulty)
 	prefix2 := strings.Repeat("1", difficulty)
 	prefix3 := strings.Repeat("2", difficulty)
-	return strings.HasPrefix(hash, prefix) ||
+	// NOTE TEMPORARILY ALWAYS TRUE
+	return true || strings.HasPrefix(hash, prefix) ||
 		strings.HasPrefix(hash, prefix2) ||
 		strings.HasPrefix(hash, prefix3)
-
 }
 
 //Returns a new Create Transaction struct
-func (bm *Blockmanager) BuildCreateTransaction(itemName string, userId string) Transaction {
+func (bm *Blockmanager) BuildCreateTransaction(itemName, userId string) Transaction {
 	return Transaction{
 		TransactionType: Create,
 		TimeTransacted:  int64(time.Now().Unix()),
 		Cr: CreateTransaction{
-			OriginUserId:      "",
+			OriginUserId:      userId,
 			DestinationUserId: userId,
 			ItemName:          itemName,
 			ItemId:            generateUID(),
@@ -157,7 +172,7 @@ func (bm *Blockmanager) BuildCreateTransaction(itemName string, userId string) T
 }
 
 //Returns a new Exchange Transaction struct
-func (bm *Blockmanager) BuildExchangeTransaction(itemName string, originUserId string, destinationUserId string) Transaction {
+func (bm *Blockmanager) BuildExchangeTransaction(itemName, itemId, originUserId, destinationUserId string) Transaction {
 	return Transaction{
 		TransactionType: Exchange,
 		TimeTransacted:  int64(time.Now().Unix()),
@@ -165,28 +180,28 @@ func (bm *Blockmanager) BuildExchangeTransaction(itemName string, originUserId s
 			OriginUserId:      originUserId,
 			DestinationUserId: destinationUserId,
 			ItemName:          itemName,
-			ItemId:            generateUID(),
+			ItemId:            itemId,
 		},
 	}
 }
 
 //Returns a new Consume Transaction struct
-func (bm *Blockmanager) BuildConsumeTransaction(itemName string, consumerUserId string) Transaction {
+func (bm *Blockmanager) BuildConsumeTransaction(itemId, consumerUserId string) Transaction {
 	return Transaction{
 		TransactionType: Consume,
 		TimeTransacted:  int64(time.Now().Unix()),
 		Co: ConsumeTransaction{
 			OriginUserId:      consumerUserId,
 			DestinationUserId: consumerUserId,
-			ItemName:          itemName,
-			ItemId:            generateUID(),
+			ItemName:          "",
+			ItemId:            itemId,
 		},
 	}
 
 }
 
 //Returns a new Make Transaction struct
-func (bm *Blockmanager) BuildMakeTransaction(inputItemNames []string, inputItemIds []string, outputItemName string, makerUserId string) Transaction {
+func (bm *Blockmanager) BuildMakeTransaction(inputItemNames, inputItemIds []string, outputItemName, makerUserId string) Transaction {
 	return Transaction{
 		TransactionType: Make,
 		TimeTransacted:  int64(time.Now().Unix()),
@@ -202,7 +217,7 @@ func (bm *Blockmanager) BuildMakeTransaction(inputItemNames []string, inputItemI
 }
 
 //Returns a new Split Transaction struct
-func (bm *Blockmanager) BuildSplitTransaction(inputItemName string, inputItemId string, outputItemNames []string, originUserId string, destinationUserIds []string) Transaction {
+func (bm *Blockmanager) BuildSplitTransaction(inputItemName, inputItemId string, outputItemNames []string, originUserId string, destinationUserIds []string) Transaction {
 	// generate new item Id's for each new item that's been split
 	var outputItemIds []string
 	for range outputItemNames {
@@ -224,8 +239,77 @@ func (bm *Blockmanager) BuildSplitTransaction(inputItemName string, inputItemId 
 
 }
 
+func (tr *Transaction) TransOwner() string {
+	switch tr.TransactionType {
+	case Create:
+		return tr.Cr.DestinationUserId
+	case Exchange:
+		return tr.Ex.DestinationUserId
+	case Consume:
+		return ""
+	case Make:
+		return tr.Ma.DestinationUserId
+	case Split:
+		return tr.Sp.DestinationUserIds[0]
+	}
+	return ""
+}
+
+// handles item stealing, double spending, ...
+// this isn't exhaustive, but demonstrates the point of the blockchain
+func (bm *Blockmanager) BlockFollowsRules(block Block, bc []Block) bool {
+	trans := block.BlockTransaction
+	switch trans.TransactionType {
+	case Create:
+		// TODO
+	case Exchange:
+		// make sure the sender actually owns it
+		// make sure it hasn't been consumed
+		// (no double spending, no stealing)
+		hist := bm.GetItemHistory(block.BlockTransaction.Ex.ItemId, bc)
+		if hist == nil || len(hist) == 0 {
+			fmt.Println("<< invalid block: item has no history >>")
+			return false
+		}
+		lastTrans := hist[len(hist)-1]
+		switch lastTrans.TransactionType {
+		case Create:
+			if lastTrans.TransOwner() != block.BlockTransaction.Ex.OriginUserId {
+				fmt.Println("<< invalid block: incorrect owner >>")
+				// fmt.Println("last owner:", lastTrans.TransOwner())
+				return false
+			}
+		case Exchange:
+			if lastTrans.TransOwner() != block.BlockTransaction.Ex.OriginUserId {
+				fmt.Println("<< invalid block: incorrect owner >>")
+				return false
+			}
+		case Consume:
+			fmt.Println("<< invalid block: item has been consumed >>")
+			return false
+		case Make:
+			if lastTrans.TransOwner() != block.BlockTransaction.Ex.OriginUserId {
+				fmt.Println("<< invalid block: incorrect owner >>")
+				return false
+			}
+		case Split:
+			if lastTrans.TransOwner() != block.BlockTransaction.Ex.OriginUserId {
+				fmt.Println("<< invalid block: incorrect owner >>")
+				return false
+			}
+		}
+	case Consume:
+		// TODO
+	case Make:
+		// TODO
+	case Split:
+		// TODO
+	}
+	return true
+}
+
 // History of an item
-func (bm *Blockmanager) GetItemHistory(itemId string, bcServer []Block) []Transaction{
+func (bm *Blockmanager) GetItemHistory(itemId string, bcServer []Block) []Transaction {
 	var result []Transaction
 
 	// Start at 1 to skip genesis
@@ -234,7 +318,7 @@ func (bm *Blockmanager) GetItemHistory(itemId string, bcServer []Block) []Transa
 		transaction := block.BlockTransaction
 
 		switch transType := transaction.TransactionType; transType {
-		
+
 		case Split:
 			splitTrans := transaction.Sp
 			if splitTrans.InputItemId == itemId {
@@ -248,7 +332,7 @@ func (bm *Blockmanager) GetItemHistory(itemId string, bcServer []Block) []Transa
 					}
 				}
 			}
-		
+
 		case Make:
 			makeTrans := transaction.Ma
 			if makeTrans.OutputItemId == itemId {
@@ -261,7 +345,7 @@ func (bm *Blockmanager) GetItemHistory(itemId string, bcServer []Block) []Transa
 					}
 				}
 			}
-			
+
 		case Create:
 			createTrans := transaction.Cr
 			if createTrans.ItemId == itemId {
