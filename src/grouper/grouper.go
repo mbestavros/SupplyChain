@@ -160,6 +160,8 @@ func (gr *Grouper) handleJoinNet(w http.ResponseWriter, r *http.Request) {
 	gr.Them = append(gr.Them, user)
 	log.Debug(user.Name, "has joined")
 	fmt.Println("<<", user.Name, "has joined the network >>")
+	// show the user a new cli prompt so they don't think it's frozen
+	fmt.Printf("> ")
 }
 
 func (gr *Grouper) handleLeaveNet(w http.ResponseWriter, r *http.Request) {
@@ -167,6 +169,8 @@ func (gr *Grouper) handleLeaveNet(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&user)
 	log.Debug(user.Name, "has left")
 	fmt.Println("<<", user.Name, "has left the network >>")
+	// show the user a new cli prompt so they don't think it's frozen
+	fmt.Printf("> ")
 	// find who it is, and remove them
 	for ind, usr := range gr.Them {
 		if user == usr {

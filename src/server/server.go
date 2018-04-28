@@ -161,6 +161,15 @@ func (sr *Server) helperVerifyBlock(w http.ResponseWriter, r *http.Request) {
 		isValid := sr.bm.IsBlockValid(newBlock, sr.bcServer[len(sr.bcServer)-1])
 		if isValid {
 			sr.bcServer = append(sr.bcServer, newBlock)
+
+			// show the receiver the Id of the item they just received
+			transaction := newBlock.BlockTransaction
+			switch transaction.TransactionType {
+			// the receiver should see the item id of the item that they received
+			case "Exchange":
+				fmt.Printf("Item %s with ItemId %s has been exchanged\n", transaction.Ex.ItemName, transaction.Ex.ItemId)
+			}
+
 		}
 	}
 

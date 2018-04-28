@@ -46,16 +46,23 @@ func generateUID() string {
 func (bm *Blockmanager) IsBlockValid(newBlock Block, oldBlock Block) bool {
 	if oldBlock.Index+1 != newBlock.Index {
 		fmt.Println(" << invalid block: index mismatch >>")
+		// show the user a new cli prompt so they don't think it's frozen
+		fmt.Printf("> ")
+
 		return false
 	}
 
 	if oldBlock.Hash != newBlock.PrevHash {
 		fmt.Println(" << invalid block: previous hash mismatch >>")
+		// show the user a new cli prompt so they don't think it's frozen
+		fmt.Printf("> ")
 		return false
 	}
 
 	if bm.calculateHash(newBlock) != newBlock.Hash {
 		fmt.Println(" << invalid block: self hash mismatch >>")
+		// show the user a new cli prompt so they don't think it's frozen
+		fmt.Printf("> ")
 		return false
 	}
 
@@ -269,6 +276,8 @@ func (bm *Blockmanager) BlockFollowsRules(block Block, bc []Block) bool {
 		hist := bm.GetItemHistory(block.BlockTransaction.Ex.ItemId, bc)
 		if hist == nil || len(hist) == 0 {
 			fmt.Println("<< invalid block: item has no history >>")
+			// show the user a new cli prompt so they don't think it's frozen
+			fmt.Printf("> ")
 			return false
 		}
 		lastTrans := hist[len(hist)-1]
@@ -276,25 +285,35 @@ func (bm *Blockmanager) BlockFollowsRules(block Block, bc []Block) bool {
 		case Create:
 			if lastTrans.TransOwner() != block.BlockTransaction.Ex.OriginUserId {
 				fmt.Println("<< invalid block: incorrect owner >>")
+				// show the user a new cli prompt so they don't think it's frozen
+				fmt.Printf("> ")
 				// fmt.Println("last owner:", lastTrans.TransOwner())
 				return false
 			}
 		case Exchange:
 			if lastTrans.TransOwner() != block.BlockTransaction.Ex.OriginUserId {
 				fmt.Println("<< invalid block: incorrect owner >>")
+				// show the user a new cli prompt so they don't think it's frozen
+				fmt.Printf("> ")
 				return false
 			}
 		case Consume:
 			fmt.Println("<< invalid block: item has been consumed >>")
+			// show the user a new cli prompt so they don't think it's frozen
+			fmt.Printf("> ")
 			return false
 		case Make:
 			if lastTrans.TransOwner() != block.BlockTransaction.Ex.OriginUserId {
 				fmt.Println("<< invalid block: incorrect owner >>")
+				// show the user a new cli prompt so they don't think it's frozen
+				fmt.Printf("> ")
 				return false
 			}
 		case Split:
 			if lastTrans.TransOwner() != block.BlockTransaction.Ex.OriginUserId {
 				fmt.Println("<< invalid block: incorrect owner >>")
+				// show the user a new cli prompt so they don't think it's frozen
+				fmt.Printf("> ")
 				return false
 			}
 		}
@@ -309,7 +328,7 @@ func (bm *Blockmanager) BlockFollowsRules(block Block, bc []Block) bool {
 }
 
 //A function that takes a userID as an input and returns the Items they currently own.
-func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []string{
+func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []string {
 	transactionsMap := make(map[string]string)
 	for block_i := 1; block_i < len(bcServer); block_i++ {
 		block := bcServer[block_i]
@@ -323,33 +342,32 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []strin
 
 		case Split:
 			splitTrans := transaction.Sp
-			if val, ok := transactionsMap[splitTrans.InputItemId]; ok{
+			if val, ok := transactionsMap[splitTrans.InputItemId]; ok {
 				fmt.Println(val)
 				delete(transactionsMap, splitTrans.InputItemId)
 			}
-			for i := 0; i <= len(splitTrans.DestinationUserIds); i++{
+			for i := 0; i <= len(splitTrans.DestinationUserIds); i++ {
 				if splitTrans.DestinationUserIds[i] == userID {
-					for i := 0; i <= len(splitTrans.OutputItemIds); i++{
-						if val, ok := transactionsMap[splitTrans.OutputItemIds[i]]; ok{
+					for i := 0; i <= len(splitTrans.OutputItemIds); i++ {
+						if val, ok := transactionsMap[splitTrans.OutputItemIds[i]]; ok {
 							fmt.Println(val)
 							delete(transactionsMap, splitTrans.OutputItemIds[i])
 						}
-					transactionsMap[splitTrans.OutputItemIds[i]] = userID
+						transactionsMap[splitTrans.OutputItemIds[i]] = userID
+					}
 				}
 			}
-		}
-
 
 		case Make:
 			makeTrans := transaction.Ma
-			for i := 0; i <= len(makeTrans.InputItemIds); i++{
-				if val, ok := transactionsMap[makeTrans.InputItemIds[i]]; ok{
+			for i := 0; i <= len(makeTrans.InputItemIds); i++ {
+				if val, ok := transactionsMap[makeTrans.InputItemIds[i]]; ok {
 					fmt.Println(val)
 					delete(transactionsMap, makeTrans.OutputItemId)
 				}
 			}
 			if makeTrans.DestinationUserId == userID {
-				if val, ok := transactionsMap[makeTrans.OutputItemId]; ok{
+				if val, ok := transactionsMap[makeTrans.OutputItemId]; ok {
 					fmt.Println(val)
 					delete(transactionsMap, makeTrans.OutputItemId)
 				}
@@ -359,7 +377,7 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []strin
 		case Create:
 			createTrans := transaction.Cr
 			if createTrans.DestinationUserId == userID {
-				if val, ok := transactionsMap[createTrans.ItemId]; ok{
+				if val, ok := transactionsMap[createTrans.ItemId]; ok {
 					fmt.Println(val)
 					delete(transactionsMap, createTrans.ItemId)
 				}
@@ -368,10 +386,10 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []strin
 
 		case Exchange:
 			exchangeTrans := transaction.Ex
-			if exchangeTrans.OriginUserId == userID{ // If the origin is the user, then they must no longer own the block
+			if exchangeTrans.OriginUserId == userID { // If the origin is the user, then they must no longer own the block
 				delete(transactionsMap, exchangeTrans.ItemId)
 			} else if exchangeTrans.DestinationUserId == userID {
-				if val, ok := transactionsMap[exchangeTrans.ItemId]; ok{
+				if val, ok := transactionsMap[exchangeTrans.ItemId]; ok {
 					fmt.Println(val)
 					delete(transactionsMap, exchangeTrans.ItemId)
 				}
@@ -381,13 +399,13 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []strin
 		case Consume:
 			consumeTrans := transaction.Co
 			if consumeTrans.DestinationUserId == userID {
-				if val, ok := transactionsMap[consumeTrans.ItemId]; ok{
+				if val, ok := transactionsMap[consumeTrans.ItemId]; ok {
 					fmt.Println(val)
 					delete(transactionsMap, consumeTrans.ItemId)
 				}
 				transactionsMap[consumeTrans.ItemId] = userID
 			}
-	}
+		}
 
 	}
 	var result []string
@@ -407,12 +425,11 @@ func (bm *Blockmanager) ItemIdToItemNameHelper(itemId string, bcServer []Block) 
 
 		case Split:
 			splitTrans := transaction.Sp
-			for i := 0; i < len(splitTrans.OutputItemIds); i++{
-				if splitTrans.OutputItemIds[i] == itemId{
+			for i := 0; i < len(splitTrans.OutputItemIds); i++ {
+				if splitTrans.OutputItemIds[i] == itemId {
 					return splitTrans.OutputItemIds[i]
 				}
 			}
-
 
 		case Make:
 			makeTrans := transaction.Ma
@@ -420,21 +437,17 @@ func (bm *Blockmanager) ItemIdToItemNameHelper(itemId string, bcServer []Block) 
 				return makeTrans.OutputItemName
 			}
 
-
 		case Create:
 			createTrans := transaction.Cr
 			if createTrans.ItemId == itemId {
 				return createTrans.ItemName
 			}
 
-
 		case Exchange:
 			exchangeTrans := transaction.Ex
 			if exchangeTrans.ItemId == itemId {
 				return exchangeTrans.ItemName
 			}
-
-
 
 		case Consume:
 			consumeTrans := transaction.Co
