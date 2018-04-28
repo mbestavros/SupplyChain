@@ -107,7 +107,7 @@ func (cl *Cli) transactFunc() {
 		itemName := readString("What is the item? ")
 		fmt.Println("Creating an item, adding it to the blockchain...")
 		tran := cl.bm.BuildCreateTransaction(itemName, cl.myName)
-		fmt.Println("ItemID", tran.Cr.ItemId)
+		fmt.Printf("=================\nPlease keep record of the ItemId %s for Item \"%s\" \n=================\n", tran.Cr.ItemId, tran.Cr.ItemName)
 		cl.sr.NewTransaction(tran)
 	case "exchange":
 		itemName := readString("What is the item? ")

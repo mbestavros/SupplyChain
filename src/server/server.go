@@ -100,22 +100,28 @@ func (sr *Server) Join(friendIp string, friendPort string, myPort string, myName
 // Generate new block and send to all peers via post request
 func (sr *Server) SendBlock(block blockmanager.Block, transaction blockmanager.Transaction) {
 	newBlock := sr.bm.GenerateBlock(block, transaction)
-	sr.bcServer = append(sr.bcServer, newBlock)
-	fmt.Println("<< sending new block to others... >> ")
+	followsRules := sr.bm.BlockFollowsRules(newBlock, sr.bcServer)
+	if followsRules {
+		isValid := sr.bm.IsBlockValid(newBlock, sr.bcServer[len(sr.bcServer)-1])
+		if isValid {
+			sr.bcServer = append(sr.bcServer, newBlock)
+			fmt.Println("<< sending new block to others... >> ")
 
-	var wg sync.WaitGroup
-	for _, usr := range sr.gr.Them {
-		wg.Add(1)
-		go func(p grouper.Peer) {
-			b := new(bytes.Buffer)
-			json.NewEncoder(b).Encode(newBlock)
-			port := increment_port(p.Port)
-			http.Post("http://"+p.Ip+":"+port+"/verifyBlock", "application/json; charset=utf-8", b)
-			wg.Done()
-		}(usr)
-		wg.Wait()
+			var wg sync.WaitGroup
+			for _, usr := range sr.gr.Them {
+				wg.Add(1)
+				go func(p grouper.Peer) {
+					b := new(bytes.Buffer)
+					json.NewEncoder(b).Encode(newBlock)
+					port := increment_port(p.Port)
+					http.Post("http://"+p.Ip+":"+port+"/verifyBlock", "application/json; charset=utf-8", b)
+					wg.Done()
+				}(usr)
+				wg.Wait()
+			}
+			fmt.Println("<< block has been broadcasted! >> ")
+		}
 	}
-	fmt.Println("<< block has been broadcasted! >> ")
 }
 
 func (sr *Server) NewTransaction(tran blockmanager.Transaction) {
@@ -168,6 +174,8 @@ func (sr *Server) helperVerifyBlock(w http.ResponseWriter, r *http.Request) {
 			// the receiver should see the item id of the item that they received
 			case "Exchange":
 				fmt.Printf("Item %s with ItemId %s has been exchanged\n", transaction.Ex.ItemName, transaction.Ex.ItemId)
+				// show the user a new cli prompt so they don't think it's frozen
+				fmt.Printf("> ")
 			}
 
 		}

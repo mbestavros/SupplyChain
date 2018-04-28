@@ -82,6 +82,8 @@ func (bm *Blockmanager) IsBlockValid(newBlock Block, oldBlock Block) bool {
 	case Split:
 		fmt.Println("<<", trans.Sp.OriginUserId, "split", trans.Sp.InputItemName, "into", trans.Sp.OutputItemNames, ">>")
 	}
+	// show the user a new cli prompt so they don't think it's frozen
+	fmt.Printf("> ")
 
 	return true
 }
