@@ -48,6 +48,7 @@ func main() {
 			fmt.Println(" help - view this help menu \n quit - exit the program \n start - start a brand new blockchain")
 			fmt.Println(" join - join an existing blockchain network \n transact - create a transaction")
 			fmt.Println(" lookup - look up the status of an item ")
+			fmt.Println(" viewall - view all items currently in the blockchain")
 		case "start":
 			cl.startFunc()
 		case "join":
@@ -58,6 +59,8 @@ func main() {
 			cl.lookupFunc()
 		case "undo block":
 			cl.sr.UndoBlock()
+		case "viewall":
+			cl.sr.ViewAll()
 		default:
 			fmt.Println("Unrecognized command. Type \"help\" for a list of commands")
 		}

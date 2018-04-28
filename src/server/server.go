@@ -185,6 +185,47 @@ func (sr *Server) helperVerifyBlock(w http.ResponseWriter, r *http.Request) {
 	log.Debug("bcserver", sr.bcServer)
 }
 
+func (sr *Server) ViewAll() {
+	fmt.Println("===========================================")
+	// pretty print the JSON objects
+	for i, block := range sr.bcServer {
+		fmt.Printf("Block: %d\n", i)
+		fmt.Printf("Hash: %s\n", block.Hash)
+		fmt.Printf("Timestamp: %s\n", block.Timestamp)
+
+		trans := block.BlockTransaction
+		fmt.Printf("TransactionType: %s\n", trans.TransactionType)
+		switch trans.TransactionType {
+		case "Create":
+			fmt.Printf("OriginUserId: %s\n", trans.Cr.OriginUserId)
+			fmt.Printf("Created ItemName: %s\n", trans.Cr.ItemName)
+			fmt.Printf("Created ItemId: %s\n", trans.Cr.ItemId)
+		case "Exchange":
+			fmt.Printf("OriginUserId: %s\n", trans.Ex.OriginUserId)
+			fmt.Printf("DestinationUserId: %s\n", trans.Ex.DestinationUserId)
+			fmt.Printf("Exchanged Item: %s\n", trans.Ex.ItemName)
+			fmt.Printf("Exchanged ItemId: %s\n", trans.Ex.ItemId)
+		case "Consume":
+			fmt.Printf("OriginUserId: %s\n\n", trans.Co.OriginUserId)
+			fmt.Printf("Consumed Item: %s\n", trans.Co.ItemName)
+			fmt.Printf("Consumed ItemId: %s\n", trans.Co.ItemId)
+		case "Make":
+			fmt.Printf("OriginUserId: %s\n", trans.Ma.OriginUserId)
+			fmt.Printf("Made Item: %s\n", trans.Ma.OutputItemName)
+			fmt.Printf("Made ItemId: %s\n", trans.Ma.OutputItemId)
+			fmt.Printf("InputItemNames: %v\n", trans.Ma.InputItemNames)
+			fmt.Printf("InputItemIds: %v\n", trans.Ma.InputItemIds)
+		case "Split":
+			fmt.Printf("OriginUserId: %s\n", trans.Sp.OriginUserId)
+			fmt.Printf("Split Item: %s\n", trans.Sp.InputItemName)
+			fmt.Printf("Split ItemId: %s\n", trans.Sp.InputItemId)
+			fmt.Printf("OutputItemNames: %v\n", trans.Sp.OutputItemNames)
+			fmt.Printf("OutputItemIds: %v\n", trans.Sp.OutputItemIds)
+		}
+		fmt.Println("===========================================")
+	}
+}
+
 func increment_port(old_port string) string {
 	port_int, err := strconv.Atoi(old_port)
 	if err != nil {
