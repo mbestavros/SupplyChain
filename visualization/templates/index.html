@@ -28,11 +28,72 @@
 
 
       <!--   Icon Section   -->
-      <ul class="collection">
+      <ul class="collapsible">
         {% for block in blockchain %}
-        <li class="collection-item">At <b>{{ block.Timestamp }}</b>, transaction number <b>{{ block.Index }}</b> was completed with hash <b>{{ block.Hash }}</b>, transaction data: <b>{{ block.ParsedBlockTransaction.type }}</b></li>
+
+        <li>
+          {% if block.ParsedBlockTransaction.type == "Genesis" %}
+          <div class="collapsible-header"><i class="material-icons">code</i><span>Transaction {{ block.Index }}: Blockchain was created.</span></div>
+          <div class="collapsible-body"><span>
+            Time: <b>{{ block.Timestamp }}</b>
+          </span></div>
+          {% endif %}
+
+          {% if block.ParsedBlockTransaction.type == "Create" %}
+          <div class="collapsible-header"><i class="material-icons">create</i><span>Transaction {{ block.Index }}: <b> {{ block.ParsedBlockTransaction.data.DestinationUserId }} </b> created <b> {{ block.ParsedBlockTransaction.data.ItemName }} </b></span></div>
+          <div class="collapsible-body"><span>      
+            Type: <b>{{ block.ParsedBlockTransaction.type }}</b><br>
+            Item ID: <b>{{ block.ParsedBlockTransaction.data.ItemId }}</b><br>
+            Time: <b>{{ block.Timestamp }}</b>
+          </span></div>
+          {% endif %}
+
+          {% if block.ParsedBlockTransaction.type == "Exchange" %}
+          <div class="collapsible-header"><i class="material-icons">compare_arrows</i><span>Transaction {{ block.Index }}: <b> {{ block.ParsedBlockTransaction.data.OriginUserId }} </b> exchanged <b> {{ block.ParsedBlockTransaction.data.ItemName }} </b> with <b> {{ block.ParsedBlockTransaction.data.DestinationUserId }} </b></span></div>
+          <div class="collapsible-body"><span>
+            Type: <b>{{ block.ParsedBlockTransaction.type }}</b><br>
+            Item ID: <b>{{ block.ParsedBlockTransaction.data.ItemId }}</b><br>
+            Time: <b>{{ block.Timestamp }}</b>
+          </span></div>
+          {% endif %}
+
+          {% if block.ParsedBlockTransaction.type == "Consume" %}
+          <div class="collapsible-header"><i class="material-icons">done</i><span>Transaction {{ block.Index }}: <b> {{ block.ParsedBlockTransaction.data.OriginUserId }} </b> consumed <b> {{ block.ParsedBlockTransaction.data.ItemName }} </b></span></div>
+          <div class="collapsible-body"><span>
+            Type: <b>{{ block.ParsedBlockTransaction.type }}</b><br>
+            Item ID: <b>{{ block.ParsedBlockTransaction.data.ItemId }}</b><br>
+            Time: <b>{{ block.Timestamp }}</b>
+          </span></div>
+          {% endif %}
+
+          {% if block.ParsedBlockTransaction.type == "Make" %}
+          <div class="collapsible-header"><i class="material-icons">build</i><span>Transaction {{ block.Index }}: <b> {{ block.ParsedBlockTransaction.data.OriginUserId }} </b> made <b> {{ block.ParsedBlockTransaction.data.OutputItemName }} </b></span></div>
+          <div class="collapsible-body"><span>
+            Type: <b>{{ block.ParsedBlockTransaction.type }}</b><br>
+            Inputs: <b>
+              {% for item in block.ParsedBlockTransaction.data.InputItemNames %}
+              <span><b>{{ item }}</b></span>
+              {% endfor %}
+            </b><br>
+            Time: <b>{{ block.Timestamp }}</b>
+          </span></div>
+          {% endif %}
+
+          {% if block.ParsedBlockTransaction.type == "Split" %}
+          <div class="collapsible-header"><i class="material-icons">loop</i><span>Transaction {{ block.Index }}: <b> {{ block.ParsedBlockTransaction.data.OriginUserId }} </b> split <b> {{ block.ParsedBlockTransaction.data.InputItemName }} </b></span></div>
+          <div class="collapsible-body"><span>
+            Type: <b>{{ block.ParsedBlockTransaction.type }}</b><br>
+            Outputs: <b>
+              {% for item in block.ParsedBlockTransaction.data.OutputItemNames %}
+              <span><b>{{ item }}</b></span>
+              {% endfor %}
+            </b><br>
+            Time: <b>{{ block.Timestamp }}</b>
+          </span></div>
+          {% endif %}
+        </li>
         {% endfor %}
-        </ul>
+      </ul>
       
 
     </div>
@@ -43,27 +104,16 @@
     <div class="container">
       <div class="row">
         <div class="col l6 s12">
-          <h5 class="white-text">Company Bio</h5>
+          <h5 class="white-text">About Us</h5>
           <p class="grey-text text-lighten-4">Welcome to our final CS651 project! Supply BlockChain is designed to be a supply chain verification system utilizing the blockchain.</p>
 
 
         </div>
         <div class="col l3 s12">
-          <h5 class="white-text">Settings</h5>
+          <h5 class="white-text">Other Links</h5>
           <ul>
             <li><a class="white-text" href="#!">Link 1</a></li>
             <li><a class="white-text" href="#!">Link 2</a></li>
-            <li><a class="white-text" href="#!">Link 3</a></li>
-            <li><a class="white-text" href="#!">Link 4</a></li>
-          </ul>
-        </div>
-        <div class="col l3 s12">
-          <h5 class="white-text"></h5>
-          <ul>
-            <li><a class="white-text" href="#!">Link 1</a></li>
-            <li><a class="white-text" href="#!">Link 2</a></li>
-            <li><a class="white-text" href="#!">Link 3</a></li>
-            <li><a class="white-text" href="#!">Link 4</a></li>
           </ul>
         </div>
       </div>

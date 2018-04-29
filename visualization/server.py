@@ -10,7 +10,7 @@ app = Flask(__name__)
 @app.route('/')
 def raw_json():
 	# jsonify returns formatted JSON
-	return jsonify(get_blockchain_json)
+	return jsonify(get_blockchain_json())
 
 @app.route('/index')
 def index():

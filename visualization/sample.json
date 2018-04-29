@@ -234,5 +234,56 @@
             "OutputItemNames":null
          }
       }
+   },
+   {
+      "Index":5,
+      "Timestamp":"2018-04-26 19:20:28.114972046 -0400 EDT m=+114.561497897",
+      "Hash":"077e0a7467121193ebd6f2eaa27c3f469469ddc9fc5bfdc5c7365c49a1986ec4",
+      "PrevHash":"042ff52e14979cafc1be0782a5af7506fe21afa82dde824b33ee915a7f46b86d",
+      "Difficulty":1,
+      "Nonce":"3",
+      "BlockTransaction":{
+         "TransactionType":"Split",
+         "TimeTransacted":1524784825,
+         "Cr":{
+            "OriginUserId":"",
+            "DestinationUserId":"",
+            "ItemId":"",
+            "ItemName":""
+         },
+         "Ex":{
+            "OriginUserId":"",
+            "DestinationUserId":"",
+            "ItemId":"",
+            "ItemName":""
+         },
+         "Co":{
+            "OriginUserId":"",
+            "DestinationUserId":"",
+            "ItemId":"",
+            "ItemName":""
+         },
+         "Ma":{
+            "OriginUserId":"",
+            "DestinationUserId":"",
+            "InputItemIds":null,
+            "InputItemNames":null,
+            "OutputItemId":"",
+            "OutputItemName":""
+         },
+         "Sp":{
+            "OriginUserId":"mark",
+            "DestinationUserIds":null,
+            "InputItemId":"",
+            "InputItemName":"iPhone",
+            "OutputItemIds":null,
+            "OutputItemNames":[
+               "Screen",
+               "CPU",
+               "RAM",
+               "Battery"
+            ]
+         }
+      }
    }
 ]
