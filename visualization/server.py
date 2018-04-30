@@ -8,13 +8,13 @@ import os
 app = Flask(__name__)
 
 # Default URL will display JSON raw.
-@app.route('/')
+@app.route('/blockchainraw')
 def raw_json():
 	# jsonify returns formatted JSON
 	return jsonify(get_blockchain_json())
 
 # URL to display entire blockchain representation
-@app.route('/blockchain')
+@app.route('/')
 def index():
 	blockchain = get_blockchain_json()
 	return render_template('blockchain.html', blockchain=blockchain)
