@@ -158,11 +158,8 @@ func (bm *Blockmanager) isHashValid(hash string, difficulty int) bool {
 	// temporarily making hash easier (avg 5 tries)
 	prefix := strings.Repeat("0", difficulty)
 	prefix2 := strings.Repeat("1", difficulty)
-	prefix3 := strings.Repeat("2", difficulty)
-	// NOTE TEMPORARILY ALWAYS TRUE
-	return true || strings.HasPrefix(hash, prefix) ||
-		strings.HasPrefix(hash, prefix2) ||
-		strings.HasPrefix(hash, prefix3)
+	return strings.HasPrefix(hash, prefix) ||
+		strings.HasPrefix(hash, prefix2)
 }
 
 //Returns a new Create Transaction struct
