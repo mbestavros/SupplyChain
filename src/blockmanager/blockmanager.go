@@ -348,9 +348,9 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []strin
 				fmt.Println(val)
 				delete(transactionsMap, splitTrans.InputItemId)
 			}
-			for i := 0; i <= len(splitTrans.DestinationUserIds); i++ {
+			for i := 0; i < len(splitTrans.DestinationUserIds); i++ {
 				if splitTrans.DestinationUserIds[i] == userID {
-					for i := 0; i <= len(splitTrans.OutputItemIds); i++ {
+					for i := 0; i < len(splitTrans.OutputItemIds); i++ {
 						if val, ok := transactionsMap[splitTrans.OutputItemIds[i]]; ok {
 							fmt.Println(val)
 							delete(transactionsMap, splitTrans.OutputItemIds[i])
@@ -362,7 +362,7 @@ func (bm *Blockmanager) GetItemsOfOwner(userID string, bcServer []Block) []strin
 
 		case Make:
 			makeTrans := transaction.Ma
-			for i := 0; i <= len(makeTrans.InputItemIds); i++ {
+			for i := 0; i < len(makeTrans.InputItemIds); i++ {
 				if val, ok := transactionsMap[makeTrans.InputItemIds[i]]; ok {
 					fmt.Println(val)
 					delete(transactionsMap, makeTrans.OutputItemId)
