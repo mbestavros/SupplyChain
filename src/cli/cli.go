@@ -109,7 +109,7 @@ func (cl *Cli) transactFunc() {
 		itemName := readString("What is the item? ")
 		fmt.Println("Creating an item, adding it to the blockchain...")
 		tran := cl.bm.BuildCreateTransaction(itemName, cl.myName)
-		fmt.Printf("=================\nPlease keep record of the ItemId %s for Item \"%s\" \n=================\n", tran.Cr.ItemId, tran.Cr.ItemName)
+		fmt.Printf("=================\nSuccess! Please keep record of the ItemId %s for Item \"%s\" \n=================\n", tran.Cr.ItemId, tran.Cr.ItemName)
 		cl.sr.NewTransaction(tran)
 	case "exchange":
 		itemName := readString("What is the item? ")
@@ -130,7 +130,7 @@ func (cl *Cli) transactFunc() {
 		outputItem := readString("What are you making? ")
 		fmt.Println("Making it on the blockchain...")
 		tran := cl.bm.BuildMakeTransaction(itemNames, itemIDs, outputItem, cl.myName)
-		fmt.Println(tran.Ma.OutputItemName, ":", tran.Ma.OutputItemId)
+		fmt.Printf("=================\nSuccess! Please keep record of the ItemId %s for Item \"%s\" \n=================\n", tran.Ma.OutputItemId, tran.Ma.OutputItemName)
 		cl.sr.NewTransaction(tran)
 	case "split":
 		inputItemName := readString("What are you splitting? (name) ")
@@ -142,9 +142,11 @@ func (cl *Cli) transactFunc() {
 			recipients[i] = cl.myName
 		}
 		tran := cl.bm.BuildSplitTransaction(inputItemName, inputItemID, outputNames, cl.myName, recipients)
+		fmt.Printf("=================\n")
 		for ind, name := range tran.Sp.OutputItemNames {
-			fmt.Println(name, ":", tran.Sp.OutputItemIds[ind])
+			fmt.Printf("Success! Please keep record of the ItemId %s for Item \"%s\" \n", tran.Sp.OutputItemIds[ind], name)
 		}
+		fmt.Printf("=================\n")
 		cl.sr.NewTransaction(tran)
 	default:
 		fmt.Println("Transaction type not recognized.")
