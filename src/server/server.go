@@ -133,6 +133,26 @@ func (sr *Server) helperJoinGetBlock(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(sr.bcServer)
 }
 
+// Helper for get request to get item history for specific item
+func (sr *Server) helperGetItemHistory(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+            fmt.Print(w, "ParseForm() err: %v", err)
+            return
+    }
+    itemId := r.FormValue("itemid")
+	json.NewEncoder(w).Encode(sr.bm.GetItemHistory(itemId, sr.bcServer))
+}
+
+// Helper for get request to get all items a specific user owns
+func (sr *Server) helperGetItemsOfOwner(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+            fmt.Print(w, "ParseForm() err: %v", err)
+            return
+    }
+    userId := r.FormValue("userid")
+	json.NewEncoder(w).Encode(sr.bm.GetItemsOfOwner(userId, sr.bcServer))
+}
+
 func (sr *Server) LookupItem(id string) {
 	transacts := sr.bm.GetItemHistory(id, sr.bcServer)
 	for ind, trans := range transacts {
@@ -245,6 +265,8 @@ func (sr *Server) Start() {
 	sr.srv = &http.Server{Handler: serverMuxServer}
 	serverMuxServer.HandleFunc("/joinGetBlock", sr.helperJoinGetBlock)
 	serverMuxServer.HandleFunc("/verifyBlock", sr.helperVerifyBlock)
+	serverMuxServer.HandleFunc("/getItemHistory", sr.helperGetItemHistory)
+	serverMuxServer.HandleFunc("/getItemsOfOwner", sr.helperGetItemsOfOwner)
 	go func() {
 		http.ListenAndServe(":"+port, serverMuxServer)
 	}()

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <title>Supply BlockChain Visualizer</title>
+
+  <!-- CSS  -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/materialize.css') }}" rel="stylesheet" media="screen">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" media="screen">
+</head>
+<body>
+  <div class="section no-pad-bot" id="index-banner">
+    <div class="container">
+      <br><br>
+      <h1 class="header center orange-text">Welcome!</h1>
+      <div class="row center">
+        <h5 class="header col s12 light">Have a look at what's happening with goods around the world.</h5>
+      </div>
+      <br><br>
+    </div>
+  </div>
+
+
+  <div class="container">
+    <div class="section">
+      <ul class="collection with-header">
+        <li class="collection-header"><h4>{{ name.name }}'s owned items</h4></li>
+        {% for item in item_list %}
+        <li class="collection-item">{{ item }}</li>
+        {% endfor %}
+      </ul>
+      
+
+    </div>
+    <br><br>
+  </div>
+
+  <footer class="page-footer orange">
+    <div class="container">
+      <div class="row">
+        <div class="col l6 s12">
+          <h5 class="white-text">About Us</h5>
+          <p class="grey-text text-lighten-4">Welcome to our final CS651 project! Supply BlockChain is designed to be a supply chain verification system utilizing the blockchain.</p>
+
+
+        </div>
+        <div class="col l3 s12">
+          <h5 class="white-text">Other Links</h5>
+          <ul>
+            <li><a class="white-text" href="/blockchain">Complete blockchain listing</a></li>
+            <li><a class="white-text" href="/getItemHistory">Look up history of a specific item</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      <div class="container">
+      Made by Mark, Ken, Shreya, Sean, and Michael</a>
+      </div>
+    </div>
+  </footer>
+
+  <!--  Scripts-->
+  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="{{ url_for('static', filename='js/materialize.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/init.js') }}"></script>
+
+  </body>
+</html>
