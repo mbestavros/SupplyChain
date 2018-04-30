@@ -8,7 +8,6 @@ import (
 	"os"
 	"server"
 	"strings"
-	// "time"
 )
 
 type Cli struct {
@@ -120,9 +119,10 @@ func (cl *Cli) transactFunc() {
 		tran := cl.bm.BuildExchangeTransaction(itemName, itemId, cl.myName, recipientName)
 		cl.sr.NewTransaction(tran)
 	case "consume":
+		itemName := readString("What is the name? ")
 		itemId := readString("What is the ID? ")
 		fmt.Println("Consuming it from the blockchain...")
-		tran := cl.bm.BuildConsumeTransaction(itemId, cl.myName)
+		tran := cl.bm.BuildConsumeTransaction(itemName, itemId, cl.myName)
 		cl.sr.NewTransaction(tran)
 	case "make":
 		itemNames := strings.Split(readString("What are the items? (List names separated by commas) "), ",")

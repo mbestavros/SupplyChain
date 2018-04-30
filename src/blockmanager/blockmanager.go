@@ -195,14 +195,14 @@ func (bm *Blockmanager) BuildExchangeTransaction(itemName, itemId, originUserId,
 }
 
 //Returns a new Consume Transaction struct
-func (bm *Blockmanager) BuildConsumeTransaction(itemId, consumerUserId string) Transaction {
+func (bm *Blockmanager) BuildConsumeTransaction(itemName, itemId, consumerUserId string) Transaction {
 	return Transaction{
 		TransactionType: Consume,
 		TimeTransacted:  int64(time.Now().Unix()),
 		Co: ConsumeTransaction{
 			OriginUserId:      consumerUserId,
 			DestinationUserId: consumerUserId,
-			ItemName:          "",
+			ItemName:          itemName,
 			ItemId:            itemId,
 		},
 	}
